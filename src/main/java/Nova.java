@@ -1,3 +1,5 @@
+import java.util.Scanner;
+
 /**
  * Entry point for the Nova chatbot.
  * At present it only prints the startup banner.
@@ -15,8 +17,8 @@ public class Nova {
     private static final String BYE_MESSAGE = "Bye. Hope to see you again soon!";
 
     public static void main(String[] args) {
-        printGreeting();
-        printFarewell();
+        Nova.printGreeting();
+        Nova.echo();
     }
 
     private static void printGreeting() {
@@ -29,5 +31,24 @@ public class Nova {
     private static void printFarewell() {
         System.out.println(BYE_MESSAGE);
         System.out.println(DIVIDER);
+    }
+
+    private static void echo() {
+        boolean isDone = false;
+        System.out.println("Say something: ");
+
+        while (!isDone) {
+            Scanner scanner = new Scanner(System.in);
+            String input = scanner.nextLine();
+
+            System.out.println(DIVIDER);
+            if (input.equals("bye")) {
+                isDone = true;
+                Nova.printFarewell();
+            } else {
+                System.out.println(input);
+                System.out.println(DIVIDER);
+            }
+        }
     }
 }
