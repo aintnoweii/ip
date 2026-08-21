@@ -1,4 +1,5 @@
 import java.util.Scanner;
+import java.util.ArrayList;
 
 /**
  * Entry point for the Nova chatbot.
@@ -16,9 +17,12 @@ public class Nova {
     private static final String HELLO_MESSAGE = String.format("Hello! I'm %s.\nWhat can I do for you?", NAME);
     private static final String BYE_MESSAGE = "Bye. Hope to see you again soon!";
 
+    // Array for storing items
+    private static final ArrayList<String> tasks = new ArrayList<>();
+
     public static void main(String[] args) {
         printGreeting();
-        echo();
+        runLoop();
     }
 
     private static void printGreeting() {
@@ -33,7 +37,7 @@ public class Nova {
         System.out.println(DIVIDER);
     }
 
-    private static void echo() {
+    private static void runLoop() {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Type something: ");
 
@@ -45,8 +49,15 @@ public class Nova {
             if (input.trim().equalsIgnoreCase("bye")) {
                 printFarewell();
                 return;
+            } else if (input.trim().equalsIgnoreCase("list")) {
+                for (int i = 0; i < tasks.size(); i++) {
+                    String line = String.format("%d. %s", i + 1, tasks.get(i));
+                    System.out.println(line);
+                }
+                System.out.println(DIVIDER);
             } else {
-                System.out.println(input);
+                tasks.add(input);
+                System.out.println("added: " + input);
                 System.out.println(DIVIDER);
             }
         }
