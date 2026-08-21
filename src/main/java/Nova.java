@@ -14,26 +14,20 @@ public class Nova {
             + "|_| \\_| \\___/  \\ V /  \\__,_|\n"
             + "                \\_/         ";
     private static final String DIVIDER = "_".repeat(60);
-    private static final String HELLO_MESSAGE = String.format("Hello! I'm %s.\nWhat can I do for you?", NAME);
-    private static final String BYE_MESSAGE = "Bye. Hope to see you again soon!";
+    private static final String GREETING = String.format("Hello! I'm %s.\nWhat can I do for you?", NAME);
+    private static final String FAREWELL = "Bye. Hope to see you again soon!";
 
     // Array for storing items
     private static final ArrayList<String> tasks = new ArrayList<>();
 
     public static void main(String[] args) {
-        printGreeting();
+        printMessage(BANNER + "\n" + GREETING);
         runLoop();
     }
 
-    private static void printGreeting() {
+    private static void printMessage(String message) {
         System.out.println(DIVIDER);
-        System.out.println(BANNER);
-        System.out.println(HELLO_MESSAGE);
-        System.out.println(DIVIDER);
-    }
-
-    private static void printFarewell() {
-        System.out.println(BYE_MESSAGE);
+        System.out.println(message);
         System.out.println(DIVIDER);
     }
 
@@ -42,21 +36,19 @@ public class Nova {
 
         while (scanner.hasNextLine()) {
             String input = scanner.nextLine().trim(); // Removes leading and trailing whitespaces
-            System.out.println(DIVIDER);
 
             if (input.isEmpty()) { // Accounts for empty inputs so we don't get "empty" tasks in the arraylist
-                System.out.println("Type something: ");
-                System.out.println(DIVIDER);
+                printMessage("Type something!");
                 continue;
             } else if (input.equalsIgnoreCase("bye")) { // Ignores letter casing
-                printFarewell();
+                printMessage(FAREWELL);
                 return;
             } else if (input.equalsIgnoreCase("list")) {
                 if (tasks.isEmpty()) {
-                    System.out.println("Your list is empty! Add something.");
-                    System.out.println(DIVIDER);
+                    printMessage("Your list is empty! Add something.");
                     continue;
                 }
+                System.out.println(DIVIDER);
                 for (int i = 0; i < tasks.size(); i++) {
                     String outString = String.format("%d. %s", i + 1, tasks.get(i));
                     System.out.println(outString);
@@ -64,10 +56,9 @@ public class Nova {
                 System.out.println(DIVIDER);
             } else {
                 tasks.add(input);
-                System.out.println("added: " + input);
-                System.out.println(DIVIDER);
+                printMessage("added: " + input);
             }
         }
-        printFarewell();
+        printMessage(FAREWELL);
     }
 }
