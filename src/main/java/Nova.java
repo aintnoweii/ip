@@ -17,8 +17,8 @@ public class Nova {
     private static final String BYE_MESSAGE = "Bye. Hope to see you again soon!";
 
     public static void main(String[] args) {
-        Nova.printGreeting();
-        Nova.echo();
+        printGreeting();
+        echo();
     }
 
     private static void printGreeting() {
@@ -34,21 +34,22 @@ public class Nova {
     }
 
     private static void echo() {
-        boolean isDone = false;
-        System.out.println("Say something: ");
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Type something: ");
 
-        while (!isDone) {
-            Scanner scanner = new Scanner(System.in);
+        while (scanner.hasNextLine()) {
             String input = scanner.nextLine();
-
             System.out.println(DIVIDER);
-            if (input.equals("bye")) {
-                isDone = true;
-                Nova.printFarewell();
+
+            // Ignores letter casing and whitespaces when checking for equality
+            if (input.trim().equalsIgnoreCase("bye")) {
+                printFarewell();
+                return;
             } else {
                 System.out.println(input);
                 System.out.println(DIVIDER);
             }
         }
+        printFarewell();
     }
 }
