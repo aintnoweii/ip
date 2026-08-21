@@ -39,20 +39,27 @@ public class Nova {
 
     private static void runLoop() {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Type something: ");
 
         while (scanner.hasNextLine()) {
-            String input = scanner.nextLine();
+            String input = scanner.nextLine().trim(); // Removes leading and trailing whitespaces
             System.out.println(DIVIDER);
 
-            // Ignores letter casing and whitespaces when checking for equality
-            if (input.trim().equalsIgnoreCase("bye")) {
+            if (input.isEmpty()) { // Accounts for empty inputs so we don't get "empty" tasks in the arraylist
+                System.out.println("Type something: ");
+                System.out.println(DIVIDER);
+                continue;
+            } else if (input.equalsIgnoreCase("bye")) { // Ignores letter casing
                 printFarewell();
                 return;
-            } else if (input.trim().equalsIgnoreCase("list")) {
+            } else if (input.equalsIgnoreCase("list")) {
+                if (tasks.isEmpty()) {
+                    System.out.println("Your list is empty! Add something.");
+                    System.out.println(DIVIDER);
+                    continue;
+                }
                 for (int i = 0; i < tasks.size(); i++) {
-                    String line = String.format("%d. %s", i + 1, tasks.get(i));
-                    System.out.println(line);
+                    String outString = String.format("%d. %s", i + 1, tasks.get(i));
+                    System.out.println(outString);
                 }
                 System.out.println(DIVIDER);
             } else {
