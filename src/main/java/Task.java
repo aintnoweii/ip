@@ -20,11 +20,4 @@ public class Task {
         String checkBox = isMarked ? "[X]" : "[ ]";
         return checkBox + " " + this.taskName;
     }
-
-//    public static void main(String[] args) {
-//        Task one = new Task("read book");
-//        one.mark();
-//        one.unmark();
-//        System.out.println(one.toString());
-//    }
 }

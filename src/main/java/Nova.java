@@ -3,7 +3,6 @@ import java.util.ArrayList;
 
 /**
  * Entry point for the Nova chatbot.
- * At present it only prints the startup banner.
  */
 public class Nova {
     private static final String NAME = "Nova";
@@ -31,17 +30,6 @@ public class Nova {
         System.out.println(DIVIDER);
     }
 
-    private static boolean isValidStatusCommand(String input) {
-        String[] splittedString = input.trim().split("\\s+");
-
-        if (splittedString.length != 2) {
-            return false;
-        }
-
-        return (splittedString[0].equalsIgnoreCase("mark")
-                    || splittedString[0].equalsIgnoreCase("unmark")) && isInteger(splittedString[1]);
-    }
-
     private static boolean isInteger(String str) {
         if (str == null) {
             return false;
@@ -54,26 +42,19 @@ public class Nova {
         }
     }
 
-    private static int processCommand(String input) {
-        String[] splittedString = input.split("\\s+");
-        String arg1 = splittedString[0];
-        int arg2 = Integer.parseInt(splittedString[1]);
-
-        if (arg2 <= 0 || arg2 > tasks.size()) {
-            return 1;
+    private static void handleStatusCommand(String command, int index) {
+        if (index <= 0 || index > tasks.size()) {
+            printMessage("The number you have entered does not exist in your list. Try again!");
+            return;
         }
 
-        if (arg1.equalsIgnoreCase("mark")) {
-            tasks.get(arg2 - 1).mark();
-            printMessage("Nice! I've marked this task as done:\n" + tasks.get(arg2 - 1).toString());
-            return 0;
-        } else if (arg1.equalsIgnoreCase("unmark")){
-            tasks.get(arg2 - 1).unmark();
-            printMessage("OK, I've unmarked this task as undone:\n" + tasks.get(arg2 - 1).toString());
-            return 0;
+        if (command.equals("mark")) {
+            tasks.get(index - 1).mark();
+            printMessage("Nice! I've marked this task as done:\n  " + tasks.get(index - 1).toString());
+        } else if (command.equals("unmark")){
+            tasks.get(index - 1).unmark();
+            printMessage("OK, I've marked this task as not done yet:\n  " + tasks.get(index - 1).toString());
         }
-
-        return 2;
     }
 
 
@@ -86,10 +67,16 @@ public class Nova {
             if (input.isEmpty()) { // Accounts for empty inputs so we don't get "empty" tasks in the arraylist
                 printMessage("Type something!");
                 continue;
-            } else if (input.equalsIgnoreCase("bye")) { // Ignores letter casing
+            }
+
+            String[] parts = input.split("\\s+", 2);
+            String command = parts[0].toLowerCase();
+            String argument = parts.length > 1 ? parts[1] : "";
+
+            if (command.equals("bye")) { // Ignores letter casing
                 printMessage(FAREWELL);
                 return;
-            } else if (input.equalsIgnoreCase("list")) {
+            } else if (command.equals("list")) {
                 if (tasks.isEmpty()) {
                     printMessage("Your list is empty! Add something.");
                     continue;
@@ -97,16 +84,15 @@ public class Nova {
                 System.out.println(DIVIDER);
                 System.out.println("Here are the tasks in your list:");
                 for (int i = 0; i < tasks.size(); i++) {
-                    String outString = String.format("%d. %s", i + 1, tasks.get(i).toString());
+                    String outString = String.format("%d.%s", i + 1, tasks.get(i).toString());
                     System.out.println(outString);
                 }
                 System.out.println(DIVIDER);
-            } else if (isValidStatusCommand(input)) {
-                int returnValue = processCommand(input);
-
-                if (returnValue == 1) {
-                    printMessage("The number you have entered does not exist in your list. Try again!");
-                    continue;
+            } else if ((command.equals("mark") || command.equals("unmark"))) {
+                if (isInteger(argument)) {
+                    handleStatusCommand(command, Integer.parseInt(argument));
+                } else {
+                    printMessage("Invalid argument! Specify which task you wish to mark/unmark");
                 }
             } else {
                 tasks.add(new Task(input));
