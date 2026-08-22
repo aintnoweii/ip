@@ -57,6 +57,11 @@ public class Nova {
         }
     }
 
+    private static void printTaskAddition(Task t) {
+        printMessage("Got it. I've added this task:\n" + "  " + t.toString() + "\n"
+                + String.format("Now you have %d tasks in the list.", tasks.size()));
+    }
+
 
     private static void runLoop() {
         Scanner scanner = new Scanner(System.in);
@@ -101,27 +106,30 @@ public class Nova {
                     }
                 }
                 case "todo" -> {
-                    tasks.add(new ToDo(argument));
-                    printMessage("ToDo added");
+                    ToDo latestToDo = new ToDo(argument);
+                    tasks.add(latestToDo);
+                    printTaskAddition(latestToDo);
                 }
                 case "deadline" -> {
                     if (parts.length == 2) {
-                        tasks.add(new Deadline(argument, parts[1].trim()));
-                        printMessage("Deadline added");
+                        Deadline latestDeadline = new Deadline(argument, parts[1].trim());
+                        tasks.add(latestDeadline);
+                        printTaskAddition(latestDeadline);
                     } else {
-                        printMessage("Input your deadline");
+                        printMessage("Use: deadline <task name> /by <end>");
                     }
                 }
                 case "event" -> {
                     if (parts.length == 3) {
-                        tasks.add(new Event(argument, parts[1].trim(), parts[2].trim()));
-                        printMessage("Event added");
+                        Event latestEvent = new Event(argument, parts[1].trim(), parts[2].trim());
+                        tasks.add(latestEvent);
+                        printTaskAddition(latestEvent);
                     } else {
-                        printMessage("Input your start and end dates/times");
+                        printMessage("Use: event <task name> /from <start> /to <end>");
                     }
                 }
                 default -> {
-                    printMessage("Input valid command - todo, deadline, event, mark or unmark");
+                    printMessage("Input valid command - start with todo, deadline, event, mark or unmark");
                 }
             }
         }

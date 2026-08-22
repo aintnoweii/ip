@@ -17,7 +17,6 @@ public class Task {
 
     @Override
     public String toString() {
-        String checkBox = isMarked ? "[X]" : "[ ]";
-        return checkBox;
+        return isMarked ? "[X]" : "[ ]";
     }
 }
