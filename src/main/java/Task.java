@@ -1,6 +1,6 @@
 public class Task {
-    private String taskName;
-    private boolean isMarked;
+    protected String taskName;
+    protected boolean isMarked;
 
     public Task(String taskName) {
         this.taskName = taskName;
@@ -18,6 +18,6 @@ public class Task {
     @Override
     public String toString() {
         String checkBox = isMarked ? "[X]" : "[ ]";
-        return checkBox + " " + this.taskName;
+        return checkBox;
     }
 }

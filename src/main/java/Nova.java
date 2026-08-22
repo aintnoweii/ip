@@ -69,34 +69,60 @@ public class Nova {
                 continue;
             }
 
-            String[] parts = input.split("\\s+", 2);
-            String command = parts[0].toLowerCase();
-            String argument = parts.length > 1 ? parts[1] : "";
+            String[] parts = input.split("/by|/from|/to");
 
-            if (command.equals("bye")) { // Ignores letter casing
-                printMessage(FAREWELL);
-                return;
-            } else if (command.equals("list")) {
-                if (tasks.isEmpty()) {
-                    printMessage("Your list is empty! Add something.");
-                    continue;
+            String[] task = parts[0].split("\\s+", 2);
+            String command = task[0].toLowerCase();
+            String argument = task.length > 1 ? task[1] : "";
+
+            switch (command) {
+                case "bye" -> {
+                    printMessage(FAREWELL);
+                    return;
                 }
-                System.out.println(DIVIDER);
-                System.out.println("Here are the tasks in your list:");
-                for (int i = 0; i < tasks.size(); i++) {
-                    String outString = String.format("%d.%s", i + 1, tasks.get(i).toString());
-                    System.out.println(outString);
+                case "list" -> {
+                    if (tasks.isEmpty()) {
+                        printMessage("Your list is empty! Add something.");
+                        continue;
+                    }
+                    System.out.println(DIVIDER);
+                    System.out.println("Here are the tasks in your list:");
+                    for (int i = 0; i < tasks.size(); i++) {
+                        String outString = String.format("%d.%s", i + 1, tasks.get(i).toString());
+                        System.out.println(outString);
+                    }
+                    System.out.println(DIVIDER);
                 }
-                System.out.println(DIVIDER);
-            } else if ((command.equals("mark") || command.equals("unmark"))) {
-                if (isInteger(argument)) {
-                    handleStatusCommand(command, Integer.parseInt(argument));
-                } else {
-                    printMessage("Invalid argument! Specify which task you wish to mark/unmark");
+                case "mark", "unmark" -> {
+                    if (isInteger(argument)) {
+                        handleStatusCommand(command, Integer.parseInt(argument));
+                    } else {
+                        printMessage("Invalid argument! Specify which task you wish to mark/unmark");
+                    }
                 }
-            } else {
-                tasks.add(new Task(input));
-                printMessage("added: " + input);
+                case "todo" -> {
+                    tasks.add(new ToDo(argument));
+                    printMessage("ToDo added");
+                }
+                case "deadline" -> {
+                    if (parts.length == 2) {
+                        tasks.add(new Deadline(argument, parts[1].trim()));
+                        printMessage("Deadline added");
+                    } else {
+                        printMessage("Input your deadline");
+                    }
+                }
+                case "event" -> {
+                    if (parts.length == 3) {
+                        tasks.add(new Event(argument, parts[1].trim(), parts[2].trim()));
+                        printMessage("Event added");
+                    } else {
+                        printMessage("Input your start and end dates/times");
+                    }
+                }
+                default -> {
+                    printMessage("Input valid command - todo, deadline, event, mark or unmark");
+                }
             }
         }
         printMessage(FAREWELL);
