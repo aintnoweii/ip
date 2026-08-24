@@ -105,6 +105,10 @@ public class Nova {
                     }
                 }
                 case "todo" -> {
+                    if (argument.isBlank()) {
+                        printMessage("Pls specify your to-do task after the command todo!");
+                        continue;
+                    }
                     ToDo latestToDo = new ToDo(argument);
                     tasks.add(latestToDo);
                     printTaskAddition(latestToDo);
