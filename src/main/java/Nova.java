@@ -74,11 +74,10 @@ public class Nova {
                 continue;
             }
 
-            String[] parts = input.split("/by|/from|/to");
+            String[] parts = input.split("\\s+", 2);
+            String command = parts[0].toLowerCase();
 
-            String[] task = parts[0].split("\\s+", 2);
-            String command = task[0].toLowerCase();
-            String argument = task.length > 1 ? task[1] : "";
+            String argument = parts.length > 1 ? parts[1].trim() : "";
 
             switch (command) {
                 case "bye" -> {
@@ -111,22 +110,26 @@ public class Nova {
                     printTaskAddition(latestToDo);
                 }
                 case "deadline" -> {
-                    if (parts.length == 2) {
-                        Deadline latestDeadline = new Deadline(argument, parts[1].trim());
-                        tasks.add(latestDeadline);
-                        printTaskAddition(latestDeadline);
-                    } else {
+                    String[] b = argument.split("/by", 2);
+                    if (b.length < 2 || b[0].isBlank() || b[1].isBlank()) {
                         printMessage("Use: deadline <task name> /by <end>");
+                        continue;
                     }
+                    Deadline latestDeadline = new Deadline(b[0].trim(), b[1].trim());
+                    tasks.add(latestDeadline);
+                    printTaskAddition(latestDeadline);
                 }
                 case "event" -> {
-                    if (parts.length == 3) {
-                        Event latestEvent = new Event(argument, parts[1].trim(), parts[2].trim());
-                        tasks.add(latestEvent);
-                        printTaskAddition(latestEvent);
-                    } else {
+                    String[] f = argument.split("/from", 2);
+                    String[] t = f.length > 1 ? f[1].split("/to", 2) : new String[0];
+
+                    if (f.length < 2 || t.length < 2 || f[0].isBlank() || t[0].isBlank() || t[1].isBlank()) {
                         printMessage("Use: event <task name> /from <start> /to <end>");
+                        continue;
                     }
+                    Event latestEvent = new Event(f[0].trim(), t[0].trim(), t[1].trim());
+                    tasks.add(latestEvent);
+                    printTaskAddition(latestEvent);
                 }
                 default -> {
                     printMessage("Input valid command - start with todo, deadline, event, mark or unmark");

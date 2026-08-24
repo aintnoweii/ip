@@ -17,6 +17,6 @@ public class Task {
 
     @Override
     public String toString() {
-        return isMarked ? "[X]" : "[ ]";
+        return (isMarked ? "[X]" : "[ ]") + " " + this.taskName;
     }
 }
