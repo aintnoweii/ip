@@ -62,6 +62,13 @@ public class Nova {
                 + String.format("Now you have %d tasks in the list.", tasks.size()));
     }
 
+    private static void handleDelete(int numberToDelete) {
+        Task toBeDeleted = tasks.get(numberToDelete - 1);
+        tasks.remove(numberToDelete - 1);
+        printMessage("Noted, I've removed this task:\n  " + toBeDeleted.toString() + "\n"
+                + String.format("Now you have %d tasks in the list", tasks.size()));
+    }
+
 
     private static void runLoop() {
         Scanner scanner = new Scanner(System.in);
@@ -103,6 +110,25 @@ public class Nova {
                     } else {
                         printMessage("Invalid argument! Specify which task you wish to mark/unmark");
                     }
+                }
+                case "delete" -> {
+                    if (argument.isBlank()) {
+                        printMessage("Pls specify which task to delete!");
+                        continue;
+                    }
+
+                    if (!isInteger(argument)) {
+                        printMessage("Specify a number after the command delete");
+                        continue;
+                    }
+
+                    int numToDelete = Integer.parseInt(argument);
+                    if (numToDelete <= 0 || numToDelete > tasks.size()) {
+                        printMessage("Specify a valid task number!");
+                        continue;
+                    }
+
+                    handleDelete(Integer.parseInt(argument));
                 }
                 case "todo" -> {
                     if (argument.isBlank()) {
