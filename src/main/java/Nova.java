@@ -1,5 +1,7 @@
 import java.util.Scanner;
 import java.util.ArrayList;
+import java.io.File;
+import java.io.FileNotFoundException;
 
 /**
  * Entry point for the Nova chatbot.
@@ -20,6 +22,7 @@ public class Nova {
     private static final ArrayList<Task> tasks = new ArrayList<>();
 
     public static void main(String[] args) {
+        // retrieveData();
         printMessage(BANNER + "\n" + GREETING);
         runLoop();
     }
@@ -67,6 +70,42 @@ public class Nova {
         tasks.remove(numberToDelete - 1);
         printMessage("Noted, I've removed this task:\n  " + toBeDeleted.toString() + "\n"
                 + String.format("Now you have %d tasks in the list", tasks.size()));
+    }
+
+    /**
+     * Reads the data file and fills up the arraylist
+     */
+    private static void retrieveData() {
+        File dataFile = new File("data/nova.txt");
+
+        try (Scanner scanner = new Scanner(dataFile)) {
+            while (scanner.hasNextLine()) {
+                String dataLine = scanner.nextLine();
+                String[] dataLineComponents = dataLine.split("\\|");
+
+                String typeOfTask = dataLineComponents[0].trim();
+                int integerRepresentationStored = Integer.parseInt(dataLineComponents[1].trim());
+                boolean isMarked = (integerRepresentationStored == 1);
+                String taskStored = dataLineComponents[2].trim();
+
+                switch (typeOfTask) {
+                    case "T":
+                        tasks.add(new ToDo(taskStored, isMarked));
+                        break;
+                    case "D":
+                        String by = dataLineComponents[3].trim();
+                        tasks.add(new Deadline(taskStored, isMarked, by));
+                        break;
+                    case "E":
+                        String from = dataLineComponents[3].trim();
+                        String to = dataLineComponents[4].trim();
+                        tasks.add(new Event(taskStored, isMarked, from, to));
+                        break;
+                }
+            }
+        } catch (FileNotFoundException e) {
+            printMessage(e.getMessage());
+        }
     }
 
 
@@ -135,7 +174,7 @@ public class Nova {
                         printMessage("Pls specify your to-do task after the command todo!");
                         continue;
                     }
-                    ToDo latestToDo = new ToDo(argument);
+                    ToDo latestToDo = new ToDo(argument, false);
                     tasks.add(latestToDo);
                     printTaskAddition(latestToDo);
                 }
@@ -145,7 +184,7 @@ public class Nova {
                         printMessage("Use: deadline <task name> /by <end>");
                         continue;
                     }
-                    Deadline latestDeadline = new Deadline(b[0].trim(), b[1].trim());
+                    Deadline latestDeadline = new Deadline(b[0].trim(), false, b[1].trim());
                     tasks.add(latestDeadline);
                     printTaskAddition(latestDeadline);
                 }
@@ -157,7 +196,7 @@ public class Nova {
                         printMessage("Use: event <task name> /from <start> /to <end>");
                         continue;
                     }
-                    Event latestEvent = new Event(f[0].trim(), t[0].trim(), t[1].trim());
+                    Event latestEvent = new Event(f[0].trim(), false, t[0].trim(), t[1].trim());
                     tasks.add(latestEvent);
                     printTaskAddition(latestEvent);
                 }
