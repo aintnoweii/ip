@@ -1,2 +1,2 @@
-T | 0 | read book
-T | 0 | sleep
+D | 0 | return book | 2pm
+E | 1 | attend tutorial | 2pm | 4pm

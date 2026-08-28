@@ -111,31 +111,16 @@ public class Nova {
         }
     }
 
-    private static void writeTask(Task t) {
-        String space = " | ";
-        String isMarked = t.isMarked ? "1" : "0";
-
-        try (BufferedWriter filewriter = new BufferedWriter(new FileWriter("data/nova.txt", true))) {
-            if (t instanceof ToDo) {
-                String s = "T" + space + isMarked + space + t.taskName;
-                filewriter.write(s);
+    private static void saveTasks() {
+        try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter("data/nova.txt"))) {
+            for (Task t : tasks) {
+                fileWriter.write(t.toDataString());
+                fileWriter.newLine();
             }
-
-            if (t instanceof Deadline) {
-                Deadline deadline = (Deadline) t;
-                String s = "D" + space + isMarked + space + t.taskName + space + deadline.by;
-                filewriter.write(s);
-            }
-
-            if (t instanceof Event) {
-                Event event = (Event) t;
-                String s = "E" + space + isMarked + space + t.taskName + space + event.from + space + event.to;
-                filewriter.write(s);
-            }
-            filewriter.newLine();
         } catch (IOException e) {
-            printMessage(e.getMessage());
+            printMessage("Error. Could not save your tasks: " + e.getMessage());
         }
+
     }
 
     private static void runLoop() {
@@ -175,6 +160,7 @@ public class Nova {
                 case "mark", "unmark" -> {
                     if (isInteger(argument)) {
                         handleStatusCommand(command, Integer.parseInt(argument));
+                        saveTasks();
                     } else {
                         printMessage("Invalid argument! Specify which task you wish to mark/unmark");
                     }
@@ -197,6 +183,7 @@ public class Nova {
                     }
 
                     handleDelete(Integer.parseInt(argument));
+                    saveTasks();
                 }
                 case "todo" -> {
                     if (argument.isBlank()) {
@@ -205,7 +192,7 @@ public class Nova {
                     }
                     ToDo latestToDo = new ToDo(argument, false);
                     tasks.add(latestToDo);
-                    writeTask(latestToDo);
+                    saveTasks();
                     printTaskAddition(latestToDo);
                 }
                 case "deadline" -> {
@@ -216,7 +203,7 @@ public class Nova {
                     }
                     Deadline latestDeadline = new Deadline(b[0].trim(), false, b[1].trim());
                     tasks.add(latestDeadline);
-                    writeTask(latestDeadline);
+                    saveTasks();
                     printTaskAddition(latestDeadline);
                 }
                 case "event" -> {
@@ -229,7 +216,7 @@ public class Nova {
                     }
                     Event latestEvent = new Event(f[0].trim(), false, t[0].trim(), t[1].trim());
                     tasks.add(latestEvent);
-                    writeTask(latestEvent);
+                    saveTasks();
                     printTaskAddition(latestEvent);
                 }
                 default -> {

@@ -1,4 +1,4 @@
-public class Task {
+public abstract class Task {
     protected String taskName;
     protected boolean isMarked;
 
@@ -14,6 +14,12 @@ public class Task {
     public void unmark() {
         this.isMarked = false;
     }
+
+    protected String dataFields() {
+        return (isMarked ? "1" : "0") + " | " + this.taskName;
+    }
+
+    protected abstract String toDataString();
 
     @Override
     public String toString() {
