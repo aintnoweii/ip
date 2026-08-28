@@ -1,5 +1,5 @@
 public class Deadline extends Task {
-    private final String by;
+    protected final String by;
 
     public Deadline(String taskName, boolean isMarked, String by) {
         super(taskName, isMarked);

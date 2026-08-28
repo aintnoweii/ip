@@ -1,6 +1,6 @@
 public class Event extends Task {
-    private final String from;
-    private final String to;
+    protected final String from;
+    protected final String to;
 
     public Event(String taskName, boolean isMarked, String from, String to) {
         super(taskName, isMarked);

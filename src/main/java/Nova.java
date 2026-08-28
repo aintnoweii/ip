@@ -1,7 +1,10 @@
+import java.io.IOException;
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.BufferedWriter;
 
 /**
  * Entry point for the Nova chatbot.
@@ -22,7 +25,7 @@ public class Nova {
     private static final ArrayList<Task> tasks = new ArrayList<>();
 
     public static void main(String[] args) {
-        // retrieveData();
+        retrieveData();
         printMessage(BANNER + "\n" + GREETING);
         runLoop();
     }
@@ -108,6 +111,32 @@ public class Nova {
         }
     }
 
+    private static void writeTask(Task t) {
+        String space = " | ";
+        String isMarked = t.isMarked ? "1" : "0";
+
+        try (BufferedWriter filewriter = new BufferedWriter(new FileWriter("data/nova.txt", true))) {
+            if (t instanceof ToDo) {
+                String s = "T" + space + isMarked + space + t.taskName;
+                filewriter.write(s);
+            }
+
+            if (t instanceof Deadline) {
+                Deadline deadline = (Deadline) t;
+                String s = "D" + space + isMarked + space + t.taskName + space + deadline.by;
+                filewriter.write(s);
+            }
+
+            if (t instanceof Event) {
+                Event event = (Event) t;
+                String s = "E" + space + isMarked + space + t.taskName + space + event.from + space + event.to;
+                filewriter.write(s);
+            }
+            filewriter.newLine();
+        } catch (IOException e) {
+            printMessage(e.getMessage());
+        }
+    }
 
     private static void runLoop() {
         Scanner scanner = new Scanner(System.in);
@@ -176,6 +205,7 @@ public class Nova {
                     }
                     ToDo latestToDo = new ToDo(argument, false);
                     tasks.add(latestToDo);
+                    writeTask(latestToDo);
                     printTaskAddition(latestToDo);
                 }
                 case "deadline" -> {
@@ -186,6 +216,7 @@ public class Nova {
                     }
                     Deadline latestDeadline = new Deadline(b[0].trim(), false, b[1].trim());
                     tasks.add(latestDeadline);
+                    writeTask(latestDeadline);
                     printTaskAddition(latestDeadline);
                 }
                 case "event" -> {
@@ -198,6 +229,7 @@ public class Nova {
                     }
                     Event latestEvent = new Event(f[0].trim(), false, t[0].trim(), t[1].trim());
                     tasks.add(latestEvent);
+                    writeTask(latestEvent);
                     printTaskAddition(latestEvent);
                 }
                 default -> {
