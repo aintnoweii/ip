@@ -5,6 +5,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.BufferedWriter;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 /**
  * Entry point for the Nova chatbot.
@@ -23,6 +27,14 @@ public class Nova {
 
     /** Location of the file tasks are persisted to, relative to the working directory. */
     private static final String DATA_FILE_PATH = "data/nova.txt";
+
+    /** Input format accepted when the user supplies a date and a time. */
+    private static final DateTimeFormatter INPUT_WITH_TIME =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
+
+    /** Shown whenever a date the user typed could not be understood. */
+    private static final String DATE_FORMAT_HINT =
+            "Dates must look like 2019-10-15 or 2019-10-15 1800.";
 
     // Array for storing items
     private static final ArrayList<Task> tasks = new ArrayList<>();
@@ -79,6 +91,30 @@ public class Nova {
     }
 
     /**
+     * Turns a date the user typed into a LocalDateTime.
+     * Accepts "yyyy-MM-dd HHmm", or "yyyy-MM-dd" on its own, in which case the
+     * time becomes midnight and is later left out of the display.
+     * Returns null rather than throwing so callers can report and move on,
+     * matching the convention used by {@link #parseDataLine(String)}.
+     *
+     * @param rawDate the text between the command markers, already trimmed
+     * @return the parsed value, or null if it matched neither format
+     */
+    private static LocalDateTime parseDateTime(String rawDate) {
+        try {
+            return LocalDateTime.parse(rawDate, INPUT_WITH_TIME);
+        } catch (DateTimeParseException e) {
+            // Not a date-and-time; fall through and try a bare date.
+        }
+
+        try {
+            return LocalDate.parse(rawDate).atStartOfDay();
+        } catch (DateTimeParseException e) {
+            return null;
+        }
+    }
+
+    /**
      * Rebuilds a single task from one line of the data file.
      * Returning null rather than throwing lets the caller skip a damaged
      * line and keep loading the rest of the file.
@@ -111,19 +147,42 @@ public class Nova {
             case "T":
                 return new ToDo(taskStored, isMarked);
             case "D":
-                if (dataLineComponents.length < 4 || dataLineComponents[3].isBlank()) {
+                if (dataLineComponents.length < 4) {
                     return null;
                 }
-                return new Deadline(taskStored, isMarked, dataLineComponents[3].trim());
+                LocalDateTime by = parseStoredDateTime(dataLineComponents[3]);
+                if (by == null) {
+                    return null;
+                }
+                return new Deadline(taskStored, isMarked, by);
             case "E":
-                if (dataLineComponents.length < 5
-                        || dataLineComponents[3].isBlank() || dataLineComponents[4].isBlank()) {
+                if (dataLineComponents.length < 5) {
                     return null;
                 }
-                return new Event(taskStored, isMarked,
-                        dataLineComponents[3].trim(), dataLineComponents[4].trim());
+                LocalDateTime from = parseStoredDateTime(dataLineComponents[3]);
+                LocalDateTime to = parseStoredDateTime(dataLineComponents[4]);
+                if (from == null || to == null) {
+                    return null;
+                }
+                return new Event(taskStored, isMarked, from, to);
             default:
                 return null;
+        }
+    }
+
+    /**
+     * Reads back a date-time written by {@code toDataString()}, which stores
+     * values in ISO-8601. Lines saved before dates were typed hold free text
+     * such as "2pm" and are rejected here, so the caller skips and counts them.
+     *
+     * @param storedField one date field from the data file
+     * @return the parsed value, or null if the field is not valid ISO-8601
+     */
+    private static LocalDateTime parseStoredDateTime(String storedField) {
+        try {
+            return LocalDateTime.parse(storedField.trim());
+        } catch (DateTimeParseException e) {
+            return null;
         }
     }
 
@@ -271,7 +330,13 @@ public class Nova {
                         printMessage("Use: deadline <task name> /by <end>");
                         continue;
                     }
-                    Deadline latestDeadline = new Deadline(b[0].trim(), false, b[1].trim());
+                    LocalDateTime by = parseDateTime(b[1].trim());
+                    if (by == null) {
+                        printMessage("I couldn't understand that date. " + DATE_FORMAT_HINT);
+                        continue;
+                    }
+
+                    Deadline latestDeadline = new Deadline(b[0].trim(), false, by);
                     tasks.add(latestDeadline);
                     saveTasks();
                     printTaskAddition(latestDeadline);
@@ -284,7 +349,14 @@ public class Nova {
                         printMessage("Use: event <task name> /from <start> /to <end>");
                         continue;
                     }
-                    Event latestEvent = new Event(f[0].trim(), false, t[0].trim(), t[1].trim());
+                    LocalDateTime from = parseDateTime(t[0].trim());
+                    LocalDateTime to = parseDateTime(t[1].trim());
+                    if (from == null || to == null) {
+                        printMessage("I couldn't understand that date. " + DATE_FORMAT_HINT);
+                        continue;
+                    }
+
+                    Event latestEvent = new Event(f[0].trim(), false, from, to);
                     tasks.add(latestEvent);
                     saveTasks();
                     printTaskAddition(latestEvent);

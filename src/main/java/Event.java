@@ -1,8 +1,10 @@
-public class Event extends Task {
-    protected final String from;
-    protected final String to;
+import java.time.LocalDateTime;
 
-    public Event(String taskName, boolean isMarked, String from, String to) {
+public class Event extends Task {
+    protected final LocalDateTime from;
+    protected final LocalDateTime to;
+
+    public Event(String taskName, boolean isMarked, LocalDateTime from, LocalDateTime to) {
         super(taskName, isMarked);
         this.from = from;
         this.to = to;
@@ -10,12 +12,13 @@ public class Event extends Task {
 
     @Override
     protected String toDataString() {
+        // LocalDateTime.toString() writes ISO-8601, which LocalDateTime.parse reads back exactly.
         return "E | " + dataFields() + " | " + this.from + " | " + this.to;
     }
 
-
     @Override
     public String toString() {
-        return "[E]" + super.toString() + String.format(" (from: %s to: %s)", this.from, this.to);
+        return "[E]" + super.toString() + String.format(" (from: %s to: %s)",
+                formatDateTime(this.from), formatDateTime(this.to));
     }
 }
