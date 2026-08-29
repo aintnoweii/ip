@@ -1,18 +1,21 @@
-public class Deadline extends Task {
-    protected final String by;
+import java.time.LocalDateTime;
 
-    public Deadline(String taskName, boolean isMarked, String by) {
+public class Deadline extends Task {
+    protected final LocalDateTime by;
+
+    public Deadline(String taskName, boolean isMarked, LocalDateTime by) {
         super(taskName, isMarked);
         this.by = by;
     }
 
     @Override
     protected String toDataString() {
+        // LocalDateTime.toString() writes ISO-8601, which LocalDateTime.parse reads back exactly.
         return "D | " + dataFields() + " | " + this.by;
     }
 
     @Override
     public String toString() {
-        return "[D]" + super.toString() + String.format(" (by: %s)", this.by);
+        return "[D]" + super.toString() + String.format(" (by: %s)", formatDateTime(this.by));
     }
 }
