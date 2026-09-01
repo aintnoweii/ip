@@ -35,7 +35,7 @@ public class Nova {
      * be read disables saving for the session, so the unreadable file is never
      * overwritten. Nothing is printed here; run() reports it in the right order.
      *
-     * @param filePath where tasks are loaded from and saved to
+     * @param filePath where tasks are loaded from and saved to.
      */
     public Nova(String filePath) {
         this.ui = new Ui();
@@ -99,14 +99,19 @@ public class Nova {
     }
 
     /**
-     * Renders the task list as one framed block.
+     * Renders a list of tasks as one framed block under the given heading.
+     * Numbering restarts at 1 for whatever is shown, so a filtered result
+     * reads as its own list rather than exposing positions in the full one.
+     *
+     * @param taskList the tasks to display.
+     * @param heading  the line shown above them.
      */
-    private void showTaskList() {
+    private void showTaskList(TaskList taskList, String heading) {
         ArrayList<String> lines = new ArrayList<>();
-        lines.add("Here are the tasks in your list:");
+        lines.add(heading);
 
-        for (int i = 0; i < tasks.size(); i++) {
-            lines.add(String.format("%d.%s", i + 1, tasks.get(i)));
+        for (int i = 0; i < taskList.size(); i++) {
+            lines.add(String.format("%d.%s", i + 1, taskList.get(i)));
         }
 
         ui.printMessage(String.join("\n", lines));
@@ -138,7 +143,21 @@ public class Nova {
                         ui.printMessage("Your list is empty! Add something.");
                         continue;
                     }
-                    showTaskList();
+                    showTaskList(tasks, "Here are the tasks in your list:");
+                }
+                case "find" -> {
+                    if (argument.isBlank()) {
+                        ui.printMessage("Pls specify a keyword to search for, e.g. find book");
+                        continue;
+                    }
+
+                    TaskList matches = tasks.find(argument);
+                    if (matches.isEmpty()) {
+                        ui.printMessage("No tasks in your list mention \"" + argument + "\".");
+                        continue;
+                    }
+
+                    showTaskList(matches, "Here are the matching tasks in your list:");
                 }
                 case "mark", "unmark" -> {
                     if (!Parser.isInteger(argument)) {
@@ -148,7 +167,8 @@ public class Nova {
 
                     int index = Integer.parseInt(argument) - 1; // the user counts from 1
                     if (index < 0 || index >= tasks.size()) {
-                        ui.printMessage("The number you have entered does not exist in your list. Try again!");
+                        ui.printMessage("The number you have entered does not exist in your list."
+                                + " Try again!");
                         continue;
                     }
 
@@ -226,7 +246,8 @@ public class Nova {
                     ui.showTaskAdded(latestEvent, tasks.size());
                 }
                 default -> {
-                    ui.printMessage("Input valid command - start with todo, deadline, event, mark or unmark");
+                    ui.printMessage("Input valid command - start with todo, deadline, event,"
+                            + " list, find, mark, unmark or delete");
                 }
             }
         }

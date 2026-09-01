@@ -29,6 +29,15 @@ public abstract class Task {
         this.isMarked = false;
     }
 
+    /**
+     * Returns the description the user gave for this task.
+     *
+     * @return the task description.
+     */
+    public String getTaskName() {
+        return this.taskName;
+    }
+
     protected String dataFields() {
         return (isMarked ? "1" : "0") + " | " + this.taskName;
     }
@@ -38,8 +47,8 @@ public abstract class Task {
      * A LocalDateTime always carries a time, so midnight is taken to mean
      * "the user gave a date only" and the time is left out of the output.
      *
-     * @param dateTime the value to render
-     * @return e.g. "Oct 15 2019" or "Oct 15 2019, 6:00PM"
+     * @param dateTime the value to render.
+     * @return e.g. "Oct 15 2019" or "Oct 15 2019, 6:00PM".
      */
     protected static String formatDateTime(LocalDateTime dateTime) {
         boolean hasTime = !dateTime.toLocalTime().equals(LocalTime.MIDNIGHT);
