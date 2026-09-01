@@ -14,7 +14,7 @@ import java.util.Scanner;
  * how a line is laid out, and how damaged lines are handled. Nothing else
  * should need to know that tasks are stored as "|"-separated text, so swapping
  * to another format means changing only this class.
- * nova.Storage never prints; it reports problems by throwing or by exposing counts,
+ * Storage never prints; it reports problems by throwing or by exposing counts,
  * and leaves messaging to the caller.
  */
 public class Storage {
@@ -25,7 +25,9 @@ public class Storage {
     private int skippedLineCount;
 
     /**
-     * @param filePath location of the data file, relative to the working directory
+     * Creates a Storage that reads and writes the file at the given path.
+     *
+     * @param filePath location of the data file, relative to the working directory.
      */
     Storage(String filePath) {
         this.filePath = filePath;
@@ -40,7 +42,7 @@ public class Storage {
      * lines that cannot be parsed are skipped and counted, so one damaged
      * entry never prevents the rest from loading.
      *
-     * @return the tasks that were successfully read, never null
+     * @return the tasks that were successfully read, never null.
      * @throws FileNotFoundException if the file exists but cannot be opened,
      *         for example because it is unreadable or is a directory. This is
      *         a real failure: the caller must not save over the file afterwards.
@@ -79,8 +81,8 @@ public class Storage {
      * saved, not just additions. The parent directory is created first
      * because FileWriter creates a missing file but never a missing directory.
      *
-     * @param tasks the current task list
-     * @throws IOException if the file could not be written
+     * @param tasks the current task list.
+     * @throws IOException if the file could not be written.
      */
     void save(TaskList tasks) throws IOException {
         File dataDirectory = this.dataFile.getParentFile();
@@ -99,14 +101,19 @@ public class Storage {
     }
 
     /**
-     * @return how many lines the last load() could not parse
+     * Returns how many lines the last load could not parse, so the caller can
+     * tell the user that some saved tasks were dropped.
+     *
+     * @return the number of unreadable lines.
      */
     int getSkippedLineCount() {
         return this.skippedLineCount;
     }
 
     /**
-     * @return the data file path, for use in messages to the user
+     * Returns the data file path, for naming the file in messages to the user.
+     *
+     * @return the path this Storage reads and writes.
      */
     String getFilePath() {
         return this.filePath;
