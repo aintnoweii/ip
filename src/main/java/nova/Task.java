@@ -1,3 +1,5 @@
+package nova;
+
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -44,7 +46,7 @@ public abstract class Task {
         return dateTime.format(hasTime ? DATE_TIME_FORMAT : DATE_ONLY_FORMAT);
     }
 
-    protected abstract String toDataString();
+    public abstract String toDataString();
 
     @Override
     public String toString() {

@@ -1,3 +1,5 @@
+package nova;
+
 /**
  * Handles everything the user sees.
  * All console output goes through here, so the rest of the program never

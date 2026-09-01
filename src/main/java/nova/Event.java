@@ -1,3 +1,5 @@
+package nova;
+
 import java.time.LocalDateTime;
 
 public class Event extends Task {
@@ -11,7 +13,7 @@ public class Event extends Task {
     }
 
     @Override
-    protected String toDataString() {
+    public String toDataString() {
         // LocalDateTime.toString() writes ISO-8601, which LocalDateTime.parse reads back exactly.
         return "E | " + dataFields() + " | " + this.from + " | " + this.to;
     }

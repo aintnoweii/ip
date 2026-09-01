@@ -1,3 +1,5 @@
+package nova;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -7,7 +9,7 @@ import java.util.Scanner;
 /**
  * Entry point for the Nova chatbot.
  * A Nova instance owns the three collaborators it needs — a Ui to talk to the
- * user, a Storage to persist tasks, and a TaskList holding them — so command
+ * user, a nova.Storage to persist tasks, and a TaskList holding them — so command
  * handling reads them as fields rather than passing them from method to method.
  */
 public class Nova {
