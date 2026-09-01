@@ -4,11 +4,20 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 
 public class Parser {
-    /** Input format accepted when the user supplies a date and a time. */
+    /**
+     * Input format accepted when the user supplies a date and a time.
+     * STRICT is needed because ofPattern() otherwise resolves leniently and
+     * would quietly move an impossible date like 2019-02-30 to Feb 28.
+     * STRICT in turn requires "uuuu" rather than "yyyy": y is the year-of-era,
+     * which strict resolving refuses to interpret without an era field, while
+     * u is the plain year and stands on its own.
+     */
     private static final DateTimeFormatter INPUT_WITH_TIME =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
+            DateTimeFormatter.ofPattern("uuuu-MM-dd HHmm")
+                    .withResolverStyle(ResolverStyle.STRICT);
 
     /**
      * Describes the formats parseDateTime accepts, for showing to the user.
