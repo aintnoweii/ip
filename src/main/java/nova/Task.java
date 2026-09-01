@@ -48,11 +48,14 @@ public abstract class Task {
     }
 
     /**
-     * Returns the parts of the saved line that every task type shares, so that
-     * subclasses only have to add their type letter and their own fields.
+     * Returns the description the user gave for this task.
      *
-     * @return the done flag and description, e.g. "1 | read book".
+     * @return the task description.
      */
+    public String getTaskName() {
+        return this.taskName;
+    }
+
     protected String dataFields() {
         return (isMarked ? "1" : "0") + " | " + this.taskName;
     }
