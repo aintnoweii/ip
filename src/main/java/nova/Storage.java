@@ -1,10 +1,11 @@
+package nova;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -13,7 +14,7 @@ import java.util.Scanner;
  * how a line is laid out, and how damaged lines are handled. Nothing else
  * should need to know that tasks are stored as "|"-separated text, so swapping
  * to another format means changing only this class.
- * Storage never prints; it reports problems by throwing or by exposing counts,
+ * nova.Storage never prints; it reports problems by throwing or by exposing counts,
  * and leaves messaging to the caller.
  */
 public class Storage {
@@ -26,7 +27,7 @@ public class Storage {
     /**
      * @param filePath location of the data file, relative to the working directory
      */
-    public Storage(String filePath) {
+    Storage(String filePath) {
         this.filePath = filePath;
         this.dataFile = new File(filePath);
         this.skippedLineCount = 0;
@@ -44,7 +45,7 @@ public class Storage {
      *         for example because it is unreadable or is a directory. This is
      *         a real failure: the caller must not save over the file afterwards.
      */
-    public ArrayList<Task> load() throws FileNotFoundException {
+    ArrayList<Task> load() throws FileNotFoundException {
         ArrayList<Task> loadedTasks = new ArrayList<>();
         this.skippedLineCount = 0;
 
@@ -81,7 +82,7 @@ public class Storage {
      * @param tasks the current task list
      * @throws IOException if the file could not be written
      */
-    public void save(TaskList tasks) throws IOException {
+    void save(TaskList tasks) throws IOException {
         File dataDirectory = this.dataFile.getParentFile();
 
         // getParentFile() is null when the path has no directory part.
@@ -100,14 +101,14 @@ public class Storage {
     /**
      * @return how many lines the last load() could not parse
      */
-    public int getSkippedLineCount() {
+    int getSkippedLineCount() {
         return this.skippedLineCount;
     }
 
     /**
      * @return the data file path, for use in messages to the user
      */
-    public String getFilePath() {
+    String getFilePath() {
         return this.filePath;
     }
 }

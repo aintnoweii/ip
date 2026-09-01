@@ -1,3 +1,5 @@
+package nova;
+
 public class ToDo extends Task {
 
     public ToDo(String taskName, boolean isMarked) {
@@ -5,7 +7,7 @@ public class ToDo extends Task {
     }
 
     @Override
-    protected String toDataString() {
+    public String toDataString() {
         return "T | " + dataFields();
     }
 
