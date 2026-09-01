@@ -22,9 +22,11 @@ public abstract class Task {
     protected boolean isMarked;
 
     /**
-     * @param taskName what the user typed as the description
+     * Creates a task with the given description and done status.
+     *
+     * @param taskName what the user typed as the description.
      * @param isMarked whether the task starts out done, true when reloading a
-     *                 task that was already completed
+     *                 task that was already completed.
      */
     public Task(String taskName, boolean isMarked) {
         this.taskName = taskName;
@@ -49,7 +51,7 @@ public abstract class Task {
      * Returns the parts of the saved line that every task type shares, so that
      * subclasses only have to add their type letter and their own fields.
      *
-     * @return the done flag and description, e.g. "1 | read book"
+     * @return the done flag and description, e.g. "1 | read book".
      */
     protected String dataFields() {
         return (isMarked ? "1" : "0") + " | " + this.taskName;
@@ -60,8 +62,8 @@ public abstract class Task {
      * A LocalDateTime always carries a time, so midnight is taken to mean
      * "the user gave a date only" and the time is left out of the output.
      *
-     * @param dateTime the value to render
-     * @return e.g. "Oct 15 2019" or "Oct 15 2019, 6:00PM"
+     * @param dateTime the value to render.
+     * @return e.g. "Oct 15 2019" or "Oct 15 2019, 6:00PM".
      */
     protected static String formatDateTime(LocalDateTime dateTime) {
         boolean hasTime = !dateTime.toLocalTime().equals(LocalTime.MIDNIGHT);
@@ -73,7 +75,7 @@ public abstract class Task {
      * Declared abstract so that each subclass supplies its own type letter and
      * extra fields, and the compiler catches any new subclass that forgets to.
      *
-     * @return e.g. "D | 1 | return book | 2019-10-15T18:00"
+     * @return e.g. "D | 1 | return book | 2019-10-15T18:00".
      */
     public abstract String toDataString();
 
@@ -81,7 +83,7 @@ public abstract class Task {
      * Renders this task for display, without its type tag.
      * Subclasses prefix their own tag, giving "[D][X] return book (by: ...)".
      *
-     * @return e.g. "[X] return book"
+     * @return e.g. "[X] return book".
      */
     @Override
     public String toString() {

@@ -13,10 +13,12 @@ public class Event extends Task {
     protected final LocalDateTime to;
 
     /**
-     * @param taskName what the user typed as the description
-     * @param isMarked whether the task starts out done
-     * @param from     when the event starts
-     * @param to       when the event ends
+     * Creates an event running between the two given times.
+     *
+     * @param taskName what the user typed as the description.
+     * @param isMarked whether the task starts out done.
+     * @param from     when the event starts.
+     * @param to       when the event ends.
      */
     public Event(String taskName, boolean isMarked, LocalDateTime from, LocalDateTime to) {
         super(taskName, isMarked);
@@ -25,7 +27,9 @@ public class Event extends Task {
     }
 
     /**
-     * @return this task as one data-file line, e.g.
+     * Returns this task as one data-file line.
+     *
+     * @return the saved form, e.g.
      *         "E | 0 | meeting | 2019-10-15T14:00 | 2019-10-15T16:00". Dates are
      *         written in ISO-8601 so that they read back exactly.
      */
@@ -35,8 +39,10 @@ public class Event extends Task {
     }
 
     /**
-     * @return this task for display, e.g.
-     *         "[E][ ] meeting (from: Oct 15 2019, 2:00PM to: Oct 15 2019, 4:00PM)"
+     * Returns this task in the form shown to the user.
+     *
+     * @return the display form, e.g.
+     *         "[E][ ] meeting (from: Oct 15 2019, 2:00PM to: Oct 15 2019, 4:00PM)".
      */
     @Override
     public String toString() {

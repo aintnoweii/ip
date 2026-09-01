@@ -39,8 +39,8 @@ public class Parser {
      * The line is checked before every field is read, so a truncated or
      * corrupted entry is rejected rather than throwing.
      *
-     * @param dataLine one saved line, e.g. "D | 0 | return book | 2019-10-15T18:00"
-     * @return the reconstructed task, or null if the line is malformed
+     * @param dataLine one saved line, e.g. "D | 0 | return book | 2019-10-15T18:00".
+     * @return the reconstructed task, or null if the line is malformed.
      */
     static Task parseDataLine(String dataLine) {
         String[] dataLineComponents = dataLine.split("\\|");
@@ -95,8 +95,8 @@ public class Parser {
      * ISO-8601. Lines saved before dates were typed hold free text such as
      * "2pm" and are rejected here, so the caller skips and counts them.
      *
-     * @param storedField one date field from the data file
-     * @return the parsed value, or null if the field is not valid ISO-8601
+     * @param storedField one date field from the data file.
+     * @return the parsed value, or null if the field is not valid ISO-8601.
      */
     static LocalDateTime parseStoredDateTime(String storedField) {
         try {
@@ -110,8 +110,8 @@ public class Parser {
      * Reports whether some text is a whole number, used to check the task
      * number given to commands like mark and delete before parsing it.
      *
-     * @param str the text to test, may be null
-     * @return true if Integer.parseInt would succeed
+     * @param str the text to test, may be null.
+     * @return true if Integer.parseInt would succeed.
      */
     static boolean isInteger(String str) {
         if (str == null) {
@@ -130,8 +130,8 @@ public class Parser {
      * Accepts "yyyy-MM-dd HHmm", or "yyyy-MM-dd" on its own, in which case the
      * time becomes midnight and is later left out of the display.
      *
-     * @param rawDate the text between the command markers, already trimmed
-     * @return the parsed value, or null if it matched neither format
+     * @param rawDate the text between the command markers, already trimmed.
+     * @return the parsed value, or null if it matched neither format.
      */
     static LocalDateTime parseDateTime(String rawDate) {
         try {

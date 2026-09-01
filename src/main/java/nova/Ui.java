@@ -44,7 +44,7 @@ public class Ui {
      * Routing every message through here means no caller can produce a
      * half-framed block.
      *
-     * @param message text to show, may span several lines
+     * @param message text to show, may span several lines.
      */
     void printMessage(String message) {
         System.out.println(DIVIDER);
@@ -55,8 +55,8 @@ public class Ui {
     /**
      * Reports that a task was added to the list.
      *
-     * @param task      the task just added
-     * @param taskCount how many tasks the list now holds
+     * @param task      the task just added.
+     * @param taskCount how many tasks the list now holds.
      */
     void showTaskAdded(Task task, int taskCount) {
         printMessage("Got it. I've added this task:\n  " + task + "\n"
@@ -67,8 +67,8 @@ public class Ui {
     /**
      * Reports that a task was deleted from the list.
      *
-     * @param task      the task just removed
-     * @param taskCount how many tasks remain
+     * @param task      the task just removed.
+     * @param taskCount how many tasks remain.
      */
     void showTaskRemoved(Task task, int taskCount) {
         printMessage("Noted, I've removed this task:\n  " + task + "\n"
@@ -79,8 +79,8 @@ public class Ui {
     /**
      * Reports that a task's done status changed.
      *
-     * @param task     the task that was updated
-     * @param isMarked true if it was marked done, false if it was un-marked
+     * @param task     the task that was updated.
+     * @param isMarked true if it was marked done, false if it was un-marked.
      */
     void showTaskMarked(Task task, boolean isMarked) {
         String heading = isMarked

@@ -9,7 +9,7 @@ import java.util.Scanner;
 /**
  * Entry point for the Nova chatbot.
  * A Nova instance owns the three collaborators it needs — a Ui to talk to the
- * user, a nova.Storage to persist tasks, and a TaskList holding them — so command
+ * user, a Storage to persist tasks, and a TaskList holding them — so command
  * handling reads them as fields rather than passing them from method to method.
  */
 public class Nova {
@@ -35,7 +35,7 @@ public class Nova {
      * be read disables saving for the session, so the unreadable file is never
      * overwritten. Nothing is printed here; run() reports it in the right order.
      *
-     * @param filePath where tasks are loaded from and saved to
+     * @param filePath where tasks are loaded from and saved to.
      */
     public Nova(String filePath) {
         this.ui = new Ui();
@@ -62,7 +62,7 @@ public class Nova {
      * Starts the chatbot, reading commands from standard input until the user
      * says goodbye.
      *
-     * @param args not used
+     * @param args not used.
      */
     public static void main(String[] args) {
         new Nova(DATA_FILE_PATH).run();
@@ -154,7 +154,8 @@ public class Nova {
 
                     int index = Integer.parseInt(argument) - 1; // the user counts from 1
                     if (index < 0 || index >= tasks.size()) {
-                        ui.printMessage("The number you have entered does not exist in your list. Try again!");
+                        ui.printMessage("The number you have entered does not exist in your list."
+                                + " Try again!");
                         continue;
                     }
 

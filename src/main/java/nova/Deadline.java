@@ -12,10 +12,12 @@ public class Deadline extends Task {
     protected final LocalDateTime by;
 
     /**
-     * @param taskName what the user typed as the description
-     * @param isMarked whether the task starts out done
+     * Creates a deadline due at the given time.
+     *
+     * @param taskName what the user typed as the description.
+     * @param isMarked whether the task starts out done.
      * @param by       when the task is due; a midnight time means the user
-     *                 gave a date only, and no time is displayed
+     *                 gave a date only, and no time is displayed.
      */
     public Deadline(String taskName, boolean isMarked, LocalDateTime by) {
         super(taskName, isMarked);
@@ -23,9 +25,10 @@ public class Deadline extends Task {
     }
 
     /**
-     * @return this task as one data-file line, e.g.
-     *         "D | 0 | return book | 2019-10-15T18:00". The date is written in
-     *         ISO-8601 so that it reads back exactly.
+     * Returns this task as one data-file line.
+     *
+     * @return the saved form, e.g. "D | 0 | return book | 2019-10-15T18:00".
+     *         The date is written in ISO-8601 so that it reads back exactly.
      */
     @Override
     public String toDataString() {
@@ -33,8 +36,10 @@ public class Deadline extends Task {
     }
 
     /**
-     * @return this task for display, e.g.
-     *         "[D][ ] return book (by: Oct 15 2019, 6:00PM)"
+     * Returns this task in the form shown to the user.
+     *
+     * @return the display form, e.g.
+     *         "[D][ ] return book (by: Oct 15 2019, 6:00PM)".
      */
     @Override
     public String toString() {

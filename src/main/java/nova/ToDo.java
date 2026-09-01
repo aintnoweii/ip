@@ -8,15 +8,19 @@ package nova;
 public class ToDo extends Task {
 
     /**
-     * @param taskName what the user typed as the description
-     * @param isMarked whether the task starts out done
+     * Creates a to-do with the given description.
+     *
+     * @param taskName what the user typed as the description.
+     * @param isMarked whether the task starts out done.
      */
     public ToDo(String taskName, boolean isMarked) {
         super(taskName, isMarked);
     }
 
     /**
-     * @return this task as one data-file line, e.g. "T | 0 | borrow book"
+     * Returns this task as one data-file line.
+     *
+     * @return the saved form, e.g. "T | 0 | borrow book".
      */
     @Override
     public String toDataString() {
@@ -24,7 +28,9 @@ public class ToDo extends Task {
     }
 
     /**
-     * @return this task for display, e.g. "[T][ ] borrow book"
+     * Returns this task in the form shown to the user.
+     *
+     * @return the display form, e.g. "[T][ ] borrow book".
      */
     @Override
     public String toString() {
