@@ -58,6 +58,12 @@ public class Nova {
         this.canSave = (error == null);
     }
 
+    /**
+     * Starts the chatbot, reading commands from standard input until the user
+     * says goodbye.
+     *
+     * @param args not used
+     */
     public static void main(String[] args) {
         new Nova(DATA_FILE_PATH).run();
     }
