@@ -2,9 +2,11 @@ package nova;
 
 /**
  * Handles everything the user sees.
- * All console output goes through here, so the rest of the program never
- * calls System.out directly and could be moved to another interface by
- * replacing only this class.
+ * The get...Message methods build plain response text with no framing, used
+ * both by the console (wrapped in a divider by printMessage) and by the GUI
+ * (shown as a dialog bubble, which is its own visual frame). Keeping the
+ * wording here means the console and the GUI never say something different
+ * for the same event.
  */
 public class Ui {
     private static final String DIVIDER = "_".repeat(60);
@@ -12,7 +14,7 @@ public class Ui {
     /** Name the chatbot introduces itself with. */
     private static final String NAME = "Nova";
 
-    /** ASCII-art logo shown once at startup. */
+    /** ASCII-art logo shown once at startup, console only. */
     private static final String BANNER = " _   _                      \n"
             + "| \\ | |  ___           __ _ \n"
             + "|  \\| | / _ \\ __   __ / _` |\n"
@@ -26,17 +28,12 @@ public class Ui {
     private static final String FAREWELL = "Bye. Hope to see you again soon!";
 
     /**
-     * Shows the startup banner and greeting as one block.
+     * Shows the startup banner and greeting as one block. Console only; the
+     * GUI shows getGreetingMessage() as its first dialog bubble instead,
+     * since ASCII art has no equivalent in a chat bubble.
      */
     void showWelcome() {
         printMessage(BANNER + "\n" + GREETING);
-    }
-
-    /**
-     * Says goodbye. Shown both when the user types "bye" and when input runs out.
-     */
-    void showFarewell() {
-        printMessage(FAREWELL);
     }
 
     /**
@@ -53,39 +50,60 @@ public class Ui {
     }
 
     /**
-     * Reports that a task was added to the list.
+     * Returns the greeting shown when the chatbot starts, with no banner.
+     *
+     * @return the greeting text.
+     */
+    String getGreetingMessage() {
+        return GREETING;
+    }
+
+    /**
+     * Returns the farewell shown when the user says goodbye or input ends.
+     *
+     * @return the farewell text.
+     */
+    String getFarewellMessage() {
+        return FAREWELL;
+    }
+
+    /**
+     * Returns the text reporting that a task was added to the list.
      *
      * @param task      the task just added.
      * @param taskCount how many tasks the list now holds.
+     * @return the report text.
      */
-    void showTaskAdded(Task task, int taskCount) {
-        printMessage("Got it. I've added this task:\n  " + task + "\n"
+    String getTaskAddedMessage(Task task, int taskCount) {
+        return "Got it. I've added this task:\n  " + task + "\n"
                 + String.format("Now you have %d task%s in the list.",
-                taskCount, taskCount == 1 ? "" : "s"));
+                taskCount, taskCount == 1 ? "" : "s");
     }
 
     /**
-     * Reports that a task was deleted from the list.
+     * Returns the text reporting that a task was deleted from the list.
      *
      * @param task      the task just removed.
      * @param taskCount how many tasks remain.
+     * @return the report text.
      */
-    void showTaskRemoved(Task task, int taskCount) {
-        printMessage("Noted, I've removed this task:\n  " + task + "\n"
+    String getTaskRemovedMessage(Task task, int taskCount) {
+        return "Noted, I've removed this task:\n  " + task + "\n"
                 + String.format("Now you have %d task%s in the list.",
-                taskCount, taskCount == 1 ? "" : "s"));
+                taskCount, taskCount == 1 ? "" : "s");
     }
 
     /**
-     * Reports that a task's done status changed.
+     * Returns the text reporting that a task's done status changed.
      *
      * @param task     the task that was updated.
      * @param isMarked true if it was marked done, false if it was un-marked.
+     * @return the report text.
      */
-    void showTaskMarked(Task task, boolean isMarked) {
+    String getTaskMarkedMessage(Task task, boolean isMarked) {
         String heading = isMarked
                 ? "Nice! I've marked this task as done:"
                 : "OK, I've marked this task as not done yet:";
-        printMessage(heading + "\n  " + task);
+        return heading + "\n  " + task;
     }
 }
