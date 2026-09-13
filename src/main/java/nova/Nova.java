@@ -189,6 +189,11 @@ public class Nova {
      * @return the response text.
      */
     private String processCommand(String input) {
+        // Both entry points trim before calling. If a third one ever forgets,
+        // a leading space would make the command word "" and every command
+        // would silently fall through to the default branch.
+        assert input.equals(input.trim()) : "processCommand() given untrimmed input: \"" + input + "\"";
+
         if (input.isEmpty()) { // Accounts for empty inputs so we don't get "empty" tasks in the arraylist
             return "Type something!";
         }
@@ -233,6 +238,11 @@ public class Nova {
 
                 boolean isMarking = command.equals("mark");
                 Task updated = isMarking ? tasks.mark(index) : tasks.unmark(index);
+
+                // mark()/unmark() return the task they changed, so the status
+                // shown to the user must match the status just applied.
+                assert updated.isDone() == isMarking : "task status does not match the command applied";
+
                 return withSaveResult(ui.getTaskMarkedMessage(updated, isMarking), save());
             }
             case "delete" -> {
