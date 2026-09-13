@@ -35,6 +35,19 @@ public class Parser {
             "Dates must look like 2019-10-15 or 2019-10-15 1800.";
 
     /**
+     * Positions of the fields in one line of the data file, which looks like
+     * "D | 1 | return book | 2019-10-15T18:00". The first three are shared by
+     * every task type; the rest depend on the type, which is why the same
+     * position carries a different meaning for a deadline and an event.
+     */
+    private static final int FIELD_TYPE = 0;
+    private static final int FIELD_DONE_FLAG = 1;
+    private static final int FIELD_DESCRIPTION = 2;
+    private static final int FIELD_DEADLINE_BY = 3;
+    private static final int FIELD_EVENT_FROM = 3;
+    private static final int FIELD_EVENT_TO = 4;
+
+    /**
      * Rebuilds a single task from one line of the data file.
      * The line is checked before every field is read, so a truncated or
      * corrupted entry is rejected rather than throwing.
@@ -43,51 +56,69 @@ public class Parser {
      * @return the reconstructed task, or null if the line is malformed.
      */
     static Task parseDataLine(String dataLine) {
-        String[] dataLineComponents = dataLine.split("\\|");
+        String[] fields = dataLine.split("\\|");
 
-        // Every task type needs at least a type, a done flag and a description.
-        if (dataLineComponents.length < 3) {
+        if (fields.length <= FIELD_DESCRIPTION) {
             return null;
         }
 
-        String markedField = dataLineComponents[1].trim();
-        if (!isInteger(markedField)) {
+        String doneFlag = fields[FIELD_DONE_FLAG].trim();
+        String description = fields[FIELD_DESCRIPTION].trim();
+        if (!isInteger(doneFlag) || description.isEmpty()) {
             return null;
         }
 
-        String typeOfTask = dataLineComponents[0].trim();
-        boolean isMarked = Integer.parseInt(markedField) == 1;
-        String taskStored = dataLineComponents[2].trim();
+        boolean isMarked = Integer.parseInt(doneFlag) == 1;
 
-        if (taskStored.isEmpty()) {
+        return switch (fields[FIELD_TYPE].trim()) {
+            case "T" -> new ToDo(description, isMarked);
+            case "D" -> parseSavedDeadline(fields, description, isMarked);
+            case "E" -> parseSavedEvent(fields, description, isMarked);
+            default -> null;
+        };
+    }
+
+    /**
+     * Rebuilds a deadline from the type-specific fields of a saved line.
+     *
+     * @param fields      the whole line, already split on the separator.
+     * @param description the description read from the shared fields.
+     * @param isMarked    the done status read from the shared fields.
+     * @return the deadline, or null if its date is missing or unreadable.
+     */
+    private static Task parseSavedDeadline(String[] fields, String description, boolean isMarked) {
+        if (fields.length <= FIELD_DEADLINE_BY) {
             return null;
         }
 
-        switch (typeOfTask) {
-            case "T":
-                return new ToDo(taskStored, isMarked);
-            case "D":
-                if (dataLineComponents.length < 4) {
-                    return null;
-                }
-                LocalDateTime by = parseStoredDateTime(dataLineComponents[3]);
-                if (by == null) {
-                    return null;
-                }
-                return new Deadline(taskStored, isMarked, by);
-            case "E":
-                if (dataLineComponents.length < 5) {
-                    return null;
-                }
-                LocalDateTime from = parseStoredDateTime(dataLineComponents[3]);
-                LocalDateTime to = parseStoredDateTime(dataLineComponents[4]);
-                if (from == null || to == null) {
-                    return null;
-                }
-                return new Event(taskStored, isMarked, from, to);
-            default:
-                return null;
+        LocalDateTime by = parseStoredDateTime(fields[FIELD_DEADLINE_BY]);
+        if (by == null) {
+            return null;
         }
+
+        return new Deadline(description, isMarked, by);
+    }
+
+    /**
+     * Rebuilds an event from the type-specific fields of a saved line.
+     *
+     * @param fields      the whole line, already split on the separator.
+     * @param description the description read from the shared fields.
+     * @param isMarked    the done status read from the shared fields.
+     * @return the event, or null if either date is missing or unreadable.
+     */
+    private static Task parseSavedEvent(String[] fields, String description, boolean isMarked) {
+        if (fields.length <= FIELD_EVENT_TO) {
+            return null;
+        }
+
+        LocalDateTime from = parseStoredDateTime(fields[FIELD_EVENT_FROM]);
+        LocalDateTime to = parseStoredDateTime(fields[FIELD_EVENT_TO]);
+        if (from == null || to == null) {
+            return null;
+        }
+
+        return new Event(description, isMarked, from, to);
     }
 
     /**
