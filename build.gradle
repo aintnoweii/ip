@@ -68,4 +68,9 @@ shadowJar {
 
 run {
     standardInput = System.in
+
+    // The JVM disables assertions unless -ea is passed, and Gradle's run task
+    // does not pass it by default. Without this the assert statements are
+    // dead code. Gradle already enables assertions for the test task.
+    enableAssertions = true
 }

@@ -44,6 +44,8 @@ public class MainWindow extends AnchorPane {
      * @param nova the chatbot backing this window.
      */
     public void setNova(Nova nova) {
+        assert nova != null : "setNova() given a null chatbot";
+
         this.nova = nova;
         dialogContainer.getChildren().add(DialogBox.getNovaDialog(nova.getGreeting(), novaImage));
     }
@@ -55,6 +57,12 @@ public class MainWindow extends AnchorPane {
      */
     @FXML
     private void handleUserInput() {
+        // FXML constructs this controller, so the chatbot is injected
+        // afterwards rather than through a constructor. Nothing forces Main
+        // to make that call, and forgetting it only shows up as an NPE on the
+        // user's first keystroke.
+        assert nova != null : "handleUserInput() ran before setNova() injected the chatbot";
+
         String input = userInput.getText();
         if (input.isBlank()) {
             return;
