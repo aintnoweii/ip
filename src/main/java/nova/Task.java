@@ -56,6 +56,15 @@ public abstract class Task {
         return this.taskName;
     }
 
+    /**
+     * Returns whether this task has been completed.
+     *
+     * @return true if the task is marked done.
+     */
+    public boolean isDone() {
+        return this.isMarked;
+    }
+
     protected String dataFields() {
         return (isMarked ? "1" : "0") + " | " + this.taskName;
     }
@@ -69,6 +78,11 @@ public abstract class Task {
      * @return e.g. "Oct 15 2019" or "Oct 15 2019, 6:00PM".
      */
     protected static String formatDateTime(LocalDateTime dateTime) {
+        // Deadline and Event pass their own fields, which Nova null-checks
+        // before it ever constructs the task. A null reaching here means a
+        // task was built from a date that was never validated.
+        assert dateTime != null : "formatDateTime() given a null date-time";
+
         boolean hasTime = !dateTime.toLocalTime().equals(LocalTime.MIDNIGHT);
         return dateTime.format(hasTime ? DATE_TIME_FORMAT : DATE_ONLY_FORMAT);
     }

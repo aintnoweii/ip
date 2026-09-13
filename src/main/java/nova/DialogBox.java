@@ -34,6 +34,12 @@ public class DialogBox extends HBox {
             throw new IllegalStateException("Could not load DialogBox.fxml", e);
         }
 
+        // These are injected by name: the fx:id values in DialogBox.fxml must
+        // match these field names. Renaming one side only leaves the field
+        // null, and the NPE below would not say why.
+        assert dialog != null : "DialogBox.fxml is missing fx:id=\"dialog\"";
+        assert displayPicture != null : "DialogBox.fxml is missing fx:id=\"displayPicture\"";
+
         dialog.setText(text);
         displayPicture.setImage(img);
     }

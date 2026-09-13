@@ -19,6 +19,11 @@ public class TaskList {
      * @param tasks initial contents, empty for a fresh start.
      */
     TaskList(ArrayList<Task> tasks) {
+        // Storage.load() promises never to return null, and the only other
+        // caller passes a fresh list. A null here would surface much later,
+        // as an NPE inside some unrelated command.
+        assert tasks != null : "TaskList constructed with a null list";
+
         this.tasks = tasks;
     }
 
@@ -47,6 +52,8 @@ public class TaskList {
      * @return the task at that position.
      */
     Task get(int index) {
+        assert isInRange(index) : "get() index out of range: " + index + " of " + size();
+
         return this.tasks.get(index);
     }
 
@@ -68,6 +75,8 @@ public class TaskList {
      * @return the task that was removed.
      */
     Task remove(int index) {
+        assert isInRange(index) : "remove() index out of range: " + index + " of " + size();
+
         return this.tasks.remove(index);
     }
 
@@ -78,6 +87,8 @@ public class TaskList {
      * @return the task that was marked, for the caller to display.
      */
     Task mark(int index) {
+        assert isInRange(index) : "mark() index out of range: " + index + " of " + size();
+
         Task task = this.tasks.get(index);
         task.mark();
         return task;
@@ -90,9 +101,25 @@ public class TaskList {
      * @return the task that was un-marked, for the caller to display.
      */
     Task unmark(int index) {
+        assert isInRange(index) : "unmark() index out of range: " + index + " of " + size();
+
         Task task = this.tasks.get(index);
         task.unmark();
         return task;
+    }
+
+    /**
+     * Reports whether a position is a valid index into this list.
+     * The commands validate the number the user typed and report a friendly
+     * message if it is wrong, so by the time a position reaches this class it
+     * has already been checked. This backs the assertions that record that
+     * contract; it is not a substitute for the caller's own validation.
+     *
+     * @param index 0-based position to test.
+     * @return true if a task exists at that position.
+     */
+    private boolean isInRange(int index) {
+        return index >= 0 && index < this.tasks.size();
     }
 
     /**

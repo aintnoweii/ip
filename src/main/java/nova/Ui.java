@@ -75,6 +75,11 @@ public class Ui {
      * @return the report text.
      */
     String getTaskAddedMessage(Task task, int taskCount) {
+        // Called straight after adding, so the list cannot be empty. A zero
+        // here would mean the add silently failed, and the user would be told
+        // "Now you have 0 tasks" right after successfully adding one.
+        assert taskCount >= 1 : "reporting an add with a task count of " + taskCount;
+
         return "Got it. I've added this task:\n  " + task + "\n"
                 + String.format("Now you have %d task%s in the list.",
                 taskCount, taskCount == 1 ? "" : "s");
@@ -88,6 +93,10 @@ public class Ui {
      * @return the report text.
      */
     String getTaskRemovedMessage(Task task, int taskCount) {
+        // Deleting the last task legitimately leaves zero, but a negative
+        // count could only come from arithmetic on the size going wrong.
+        assert taskCount >= 0 : "reporting a delete with a task count of " + taskCount;
+
         return "Noted, I've removed this task:\n  " + task + "\n"
                 + String.format("Now you have %d task%s in the list.",
                 taskCount, taskCount == 1 ? "" : "s");
