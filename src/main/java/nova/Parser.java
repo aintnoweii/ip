@@ -157,6 +157,33 @@ public class Parser {
     }
 
     /**
+     * Splits a command argument on a marker such as "/by" or "/from".
+     * Both halves must carry text, since a deadline with no description, or
+     * with nothing after the marker, is a usage error rather than a task worth
+     * creating. Returning null rather than an empty result lets each caller
+     * word its own usage hint.
+     *
+     * @param argument text after the command word.
+     * @param marker   the separator to split on, for example "/by".
+     * @return the two trimmed halves, or null if the marker is missing or
+     *         either half is blank.
+     */
+    static MarkerParts splitOnMarker(String argument, String marker) {
+        String[] halves = argument.split(marker, 2);
+        if (halves.length < 2) {
+            return null;
+        }
+
+        String before = halves[0].trim();
+        String after = halves[1].trim();
+        if (before.isEmpty() || after.isEmpty()) {
+            return null;
+        }
+
+        return new MarkerParts(before, after);
+    }
+
+    /**
      * Turns a date the user typed into a LocalDateTime.
      * Accepts "yyyy-MM-dd HHmm", or "yyyy-MM-dd" on its own, in which case the
      * time becomes midnight and is later left out of the display.
