@@ -312,17 +312,17 @@ public class Nova {
      * @return confirmation of the addition, or the usage hint.
      */
     private String handleDeadline(String argument) {
-        String[] descriptionAndBy = argument.split("/by", 2);
-        if (descriptionAndBy.length < 2 || descriptionAndBy[0].isBlank() || descriptionAndBy[1].isBlank()) {
+        MarkerParts descriptionAndBy = splitOnMarker(argument, "/by");
+        if (descriptionAndBy == null) {
             return "Use: deadline <task name> /by <end>";
         }
 
-        LocalDateTime by = Parser.parseDateTime(descriptionAndBy[1].trim());
+        LocalDateTime by = Parser.parseDateTime(descriptionAndBy.after());
         if (by == null) {
             return "I couldn't understand that date. " + Parser.DATE_FORMAT_HINT;
         }
 
-        return addTask(new Deadline(descriptionAndBy[0].trim(), false, by));
+        return addTask(new Deadline(descriptionAndBy.before(), false, by));
     }
 
     /**
@@ -333,23 +333,61 @@ public class Nova {
      * @return confirmation of the addition, or the usage hint.
      */
     private String handleEvent(String argument) {
-        String[] descriptionAndRest = argument.split("/from", 2);
-        String[] fromAndTo = descriptionAndRest.length > 1
-                ? descriptionAndRest[1].split("/to", 2)
-                : new String[0];
+        String usageHint = "Use: event <task name> /from <start> /to <end>";
 
-        if (descriptionAndRest.length < 2 || fromAndTo.length < 2
-                || descriptionAndRest[0].isBlank() || fromAndTo[0].isBlank() || fromAndTo[1].isBlank()) {
-            return "Use: event <task name> /from <start> /to <end>";
+        MarkerParts descriptionAndRest = splitOnMarker(argument, "/from");
+        if (descriptionAndRest == null) {
+            return usageHint;
         }
 
-        LocalDateTime from = Parser.parseDateTime(fromAndTo[0].trim());
-        LocalDateTime to = Parser.parseDateTime(fromAndTo[1].trim());
+        MarkerParts fromAndTo = splitOnMarker(descriptionAndRest.after(), "/to");
+        if (fromAndTo == null) {
+            return usageHint;
+        }
+
+        LocalDateTime from = Parser.parseDateTime(fromAndTo.before());
+        LocalDateTime to = Parser.parseDateTime(fromAndTo.after());
         if (from == null || to == null) {
             return "I couldn't understand that date. " + Parser.DATE_FORMAT_HINT;
         }
 
-        return addTask(new Event(descriptionAndRest[0].trim(), false, from, to));
+        return addTask(new Event(descriptionAndRest.before(), false, from, to));
+    }
+
+    /**
+     * The two halves of a command argument split on a marker, each trimmed.
+     *
+     * @param before text before the marker.
+     * @param after  text after the marker.
+     */
+    private record MarkerParts(String before, String after) {
+    }
+
+    /**
+     * Splits a command argument on a marker such as "/by" or "/from".
+     * Both halves must carry text, since a deadline with no description, or
+     * with nothing after the marker, is a usage error rather than a task worth
+     * creating. Returning null rather than an empty result lets each caller
+     * word its own usage hint.
+     *
+     * @param argument text after the command word.
+     * @param marker   the separator to split on, for example "/by".
+     * @return the two trimmed halves, or null if the marker is missing or
+     *         either half is blank.
+     */
+    private static MarkerParts splitOnMarker(String argument, String marker) {
+        String[] halves = argument.split(marker, 2);
+        if (halves.length < 2) {
+            return null;
+        }
+
+        String before = halves[0].trim();
+        String after = halves[1].trim();
+        if (before.isEmpty() || after.isEmpty()) {
+            return null;
+        }
+
+        return new MarkerParts(before, after);
     }
 
     /**
