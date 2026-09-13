@@ -1,6 +1,7 @@
 package nova;
 
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 /**
  * The user's tasks, in the order they were added.
@@ -106,14 +107,14 @@ public class TaskList {
      * @return the matching tasks, in the order they appear in this list.
      */
     TaskList find(String keyword) {
-        ArrayList<Task> matches = new ArrayList<>();
         String lowerCaseKeyword = keyword.toLowerCase();
 
-        for (Task task : this.tasks) {
-            if (task.getTaskName().toLowerCase().contains(lowerCaseKeyword)) {
-                matches.add(task);
-            }
-        }
+        // Collected into an ArrayList rather than with toList(), because the
+        // result is handed to a TaskList, which adds to and removes from the
+        // list it is given. toList() returns an immutable list.
+        ArrayList<Task> matches = this.tasks.stream()
+                .filter(task -> task.getTaskName().toLowerCase().contains(lowerCaseKeyword))
+                .collect(Collectors.toCollection(ArrayList::new));
 
         return new TaskList(matches);
     }
