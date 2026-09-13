@@ -198,104 +198,171 @@ public class Nova {
 
         String argument = parts.length > 1 ? parts[1].trim() : "";
 
-        switch (command) {
-            case "bye" -> {
-                return ui.getFarewellMessage();
-            }
-            case "list" -> {
-                if (tasks.isEmpty()) {
-                    return "Your list is empty! Add something.";
-                }
-                return buildTaskListMessage(tasks, "Here are the tasks in your list:");
-            }
-            case "find" -> {
-                if (argument.isBlank()) {
-                    return "Pls specify a keyword to search for, e.g. find book";
-                }
+        return switch (command) {
+            case "bye" -> ui.getFarewellMessage();
+            case "list" -> handleList();
+            case "find" -> handleFind(argument);
+            case "mark", "unmark" -> handleMarkOrUnmark(command, argument);
+            case "delete" -> handleDelete(argument);
+            case "todo" -> handleTodo(argument);
+            case "deadline" -> handleDeadline(argument);
+            case "event" -> handleEvent(argument);
+            default -> "Input valid command - start with todo, deadline, event,"
+                    + " list, find, mark, unmark or delete";
+        };
+    }
 
-                TaskList matches = tasks.find(argument);
-                if (matches.isEmpty()) {
-                    return "No tasks in your list mention \"" + argument + "\".";
-                }
-
-                return buildTaskListMessage(matches, "Here are the matching tasks in your list:");
-            }
-            case "mark", "unmark" -> {
-                if (!Parser.isInteger(argument)) {
-                    return "Invalid argument! Specify which task you wish to mark/unmark";
-                }
-
-                int index = Integer.parseInt(argument) - 1; // the user counts from 1
-                if (index < 0 || index >= tasks.size()) {
-                    return "The number you have entered does not exist in your list."
-                            + " Try again!";
-                }
-
-                boolean isMarking = command.equals("mark");
-                Task updated = isMarking ? tasks.mark(index) : tasks.unmark(index);
-                return withSaveResult(ui.getTaskMarkedMessage(updated, isMarking), save());
-            }
-            case "delete" -> {
-                if (argument.isBlank()) {
-                    return "Pls specify which task to delete!";
-                }
-
-                if (!Parser.isInteger(argument)) {
-                    return "Specify a number after the command delete";
-                }
-
-                int index = Integer.parseInt(argument) - 1; // the user counts from 1
-                if (index < 0 || index >= tasks.size()) {
-                    return "Specify a valid task number!";
-                }
-
-                Task removed = tasks.remove(index);
-                return withSaveResult(ui.getTaskRemovedMessage(removed, tasks.size()), save());
-            }
-            case "todo" -> {
-                if (argument.isBlank()) {
-                    return "Pls specify your to-do task after the command todo!";
-                }
-                ToDo latestToDo = new ToDo(argument, false);
-                tasks.add(latestToDo);
-                return withSaveResult(ui.getTaskAddedMessage(latestToDo, tasks.size()), save());
-            }
-            case "deadline" -> {
-                String[] b = argument.split("/by", 2);
-                if (b.length < 2 || b[0].isBlank() || b[1].isBlank()) {
-                    return "Use: deadline <task name> /by <end>";
-                }
-                LocalDateTime by = Parser.parseDateTime(b[1].trim());
-                if (by == null) {
-                    return "I couldn't understand that date. " + Parser.DATE_FORMAT_HINT;
-                }
-
-                Deadline latestDeadline = new Deadline(b[0].trim(), false, by);
-                tasks.add(latestDeadline);
-                return withSaveResult(ui.getTaskAddedMessage(latestDeadline, tasks.size()), save());
-            }
-            case "event" -> {
-                String[] f = argument.split("/from", 2);
-                String[] t = f.length > 1 ? f[1].split("/to", 2) : new String[0];
-
-                if (f.length < 2 || t.length < 2 || f[0].isBlank() || t[0].isBlank() || t[1].isBlank()) {
-                    return "Use: event <task name> /from <start> /to <end>";
-                }
-                LocalDateTime from = Parser.parseDateTime(t[0].trim());
-                LocalDateTime to = Parser.parseDateTime(t[1].trim());
-                if (from == null || to == null) {
-                    return "I couldn't understand that date. " + Parser.DATE_FORMAT_HINT;
-                }
-
-                Event latestEvent = new Event(f[0].trim(), false, from, to);
-                tasks.add(latestEvent);
-                return withSaveResult(ui.getTaskAddedMessage(latestEvent, tasks.size()), save());
-            }
-            default -> {
-                return "Input valid command - start with todo, deadline, event,"
-                        + " list, find, mark, unmark or delete";
-            }
+    /**
+     * Shows every task currently stored.
+     *
+     * @return the numbered list, or a prompt if nothing is stored yet.
+     */
+    private String handleList() {
+        if (tasks.isEmpty()) {
+            return "Your list is empty! Add something.";
         }
+
+        return buildTaskListMessage(tasks, "Here are the tasks in your list:");
+    }
+
+    /**
+     * Shows the tasks whose description contains the given keyword.
+     *
+     * @param keyword text after the "find" command word.
+     * @return the matching tasks, or a message explaining why there are none.
+     */
+    private String handleFind(String keyword) {
+        if (keyword.isBlank()) {
+            return "Pls specify a keyword to search for, e.g. find book";
+        }
+
+        TaskList matches = tasks.find(keyword);
+        if (matches.isEmpty()) {
+            return "No tasks in your list mention \"" + keyword + "\".";
+        }
+
+        return buildTaskListMessage(matches, "Here are the matching tasks in your list:");
+    }
+
+    /**
+     * Changes the done status of one task.
+     *
+     * @param command  either "mark" or "unmark", deciding which way to set it.
+     * @param argument text after the command word, expected to be a task number.
+     * @return confirmation of the change, or an explanation of what was wrong.
+     */
+    private String handleMarkOrUnmark(String command, String argument) {
+        if (!Parser.isInteger(argument)) {
+            return "Invalid argument! Specify which task you wish to mark/unmark";
+        }
+
+        int index = Integer.parseInt(argument) - 1; // the user counts from 1
+        if (index < 0 || index >= tasks.size()) {
+            return "The number you have entered does not exist in your list."
+                    + " Try again!";
+        }
+
+        boolean isMarking = command.equals("mark");
+        Task updated = isMarking ? tasks.mark(index) : tasks.unmark(index);
+        return withSaveResult(ui.getTaskMarkedMessage(updated, isMarking), save());
+    }
+
+    /**
+     * Removes one task from the list.
+     *
+     * @param argument text after the "delete" command word, expected to be a task number.
+     * @return confirmation of the removal, or an explanation of what was wrong.
+     */
+    private String handleDelete(String argument) {
+        if (argument.isBlank()) {
+            return "Pls specify which task to delete!";
+        }
+
+        if (!Parser.isInteger(argument)) {
+            return "Specify a number after the command delete";
+        }
+
+        int index = Integer.parseInt(argument) - 1; // the user counts from 1
+        if (index < 0 || index >= tasks.size()) {
+            return "Specify a valid task number!";
+        }
+
+        Task removed = tasks.remove(index);
+        return withSaveResult(ui.getTaskRemovedMessage(removed, tasks.size()), save());
+    }
+
+    /**
+     * Adds a task with no date attached.
+     *
+     * @param description text after the "todo" command word.
+     * @return confirmation of the addition, or the usage hint.
+     */
+    private String handleTodo(String description) {
+        if (description.isBlank()) {
+            return "Pls specify your to-do task after the command todo!";
+        }
+
+        return addTask(new ToDo(description, false));
+    }
+
+    /**
+     * Adds a task due by a given date, written "{@code <description>} /by {@code <date>}".
+     *
+     * @param argument text after the "deadline" command word.
+     * @return confirmation of the addition, or the usage hint.
+     */
+    private String handleDeadline(String argument) {
+        String[] descriptionAndBy = argument.split("/by", 2);
+        if (descriptionAndBy.length < 2 || descriptionAndBy[0].isBlank() || descriptionAndBy[1].isBlank()) {
+            return "Use: deadline <task name> /by <end>";
+        }
+
+        LocalDateTime by = Parser.parseDateTime(descriptionAndBy[1].trim());
+        if (by == null) {
+            return "I couldn't understand that date. " + Parser.DATE_FORMAT_HINT;
+        }
+
+        return addTask(new Deadline(descriptionAndBy[0].trim(), false, by));
+    }
+
+    /**
+     * Adds a task spanning two dates, written
+     * "{@code <description>} /from {@code <start>} /to {@code <end>}".
+     *
+     * @param argument text after the "event" command word.
+     * @return confirmation of the addition, or the usage hint.
+     */
+    private String handleEvent(String argument) {
+        String[] descriptionAndRest = argument.split("/from", 2);
+        String[] fromAndTo = descriptionAndRest.length > 1
+                ? descriptionAndRest[1].split("/to", 2)
+                : new String[0];
+
+        if (descriptionAndRest.length < 2 || fromAndTo.length < 2
+                || descriptionAndRest[0].isBlank() || fromAndTo[0].isBlank() || fromAndTo[1].isBlank()) {
+            return "Use: event <task name> /from <start> /to <end>";
+        }
+
+        LocalDateTime from = Parser.parseDateTime(fromAndTo[0].trim());
+        LocalDateTime to = Parser.parseDateTime(fromAndTo[1].trim());
+        if (from == null || to == null) {
+            return "I couldn't understand that date. " + Parser.DATE_FORMAT_HINT;
+        }
+
+        return addTask(new Event(descriptionAndRest[0].trim(), false, from, to));
+    }
+
+    /**
+     * Stores a newly created task and reports it, saving the updated list.
+     * The three add commands differ only in how they build the task, so the
+     * steps that follow are shared here rather than repeated in each.
+     *
+     * @param task the task to store.
+     * @return confirmation of the addition, with any save failure appended.
+     */
+    private String addTask(Task task) {
+        tasks.add(task);
+        return withSaveResult(ui.getTaskAddedMessage(task, tasks.size()), save());
     }
 
     private void runLoop() {
