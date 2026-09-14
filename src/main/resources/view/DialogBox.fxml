@@ -1,22 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 
+<!--
+  One message in the transcript. Both speakers share this file, but the two
+  factory methods on DialogBox configure it very differently: a user message
+  hides the avatar and lets the label hug its text, while a Nova message shows
+  the avatar and lets the label span the window. Padding and spacing come from
+  the "message" style class in main.css.
+-->
 <fx:root alignment="TOP_RIGHT"
-         maxHeight="1.7976931348623157E308"
          maxWidth="1.7976931348623157E308"
-         prefWidth="400.0"
+         styleClass="message"
          type="javafx.scene.layout.HBox"
          xmlns="http://javafx.com/javafx/17"
          xmlns:fx="http://javafx.com/fxml/1">
   <children>
-    <Label fx:id="dialog" text="Label" wrapText="true" minHeight="-Infinity"/>
-    <ImageView fx:id="displayPicture" fitHeight="99.0" fitWidth="99.0" pickOnBounds="true" preserveRatio="true" />
+    <Label fx:id="dialog" minHeight="-Infinity" text="Label" wrapText="true" />
+    <ImageView fx:id="displayPicture"
+               fitHeight="34.0"
+               fitWidth="34.0"
+               pickOnBounds="true"
+               preserveRatio="true" />
   </children>
-  <padding>
-    <Insets bottom="15.0" left="5.0" right="5.0" top="15.0" />
-  </padding>
 </fx:root>

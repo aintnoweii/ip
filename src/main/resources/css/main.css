@@ -1,0 +1,146 @@
+/*
+ * Nova GUI theme.
+ *
+ * The two speakers are deliberately not styled the same way. The user types
+ * short commands, so those get a compact filled bubble that hugs its text.
+ * Nova answers with program output -- numbered task lists whose "[T][X]"
+ * columns only line up in a fixed-width font -- so those get a full-width
+ * panel in monospace, marked with an accent stripe rather than shaped as
+ * speech. See DialogBox for the matching layout rules.
+ *
+ * The two accent colours are sampled from the avatar images, so the palette
+ * and the artwork cannot drift apart.
+ */
+
+/*
+ * Only one family is named anywhere in this file, because JavaFX does not
+ * support the comma-separated fallback lists that web CSS does: it treats the
+ * whole list as a single family name, fails to match it, and silently falls
+ * back to System. Stick to the logical families ("System", "Monospaced"),
+ * which every platform is guaranteed to resolve.
+ */
+
+.root {
+    -fx-background-color: #f4f5f7;
+}
+
+/* ------------------------------------------------------------------ */
+/* Transcript                                                          */
+/* ------------------------------------------------------------------ */
+
+.scroll-pane {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+/* Without this the viewport paints the default grey behind every message. */
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 8;
+}
+
+.scroll-bar:vertical .thumb {
+    -fx-background-color: #c9ccd4;
+    -fx-background-radius: 4;
+}
+
+.scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #a9adb8;
+}
+
+/* Hide the arrow buttons at each end of the track. */
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-padding: 0;
+    -fx-pref-height: 0;
+}
+
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-padding: 0;
+    -fx-shape: "";
+}
+
+/* ------------------------------------------------------------------ */
+/* Messages                                                            */
+/* ------------------------------------------------------------------ */
+
+/* The row a single message sits in, whoever said it. */
+.message {
+    -fx-padding: 5 14 5 14;
+    -fx-spacing: 9;
+}
+
+/* What the user typed: a bubble, because a person is speaking. */
+.user-bubble {
+    -fx-background-color: #4f8cd9;
+    -fx-background-radius: 16 16 4 16;
+    -fx-padding: 9 14 9 14;
+    -fx-font-size: 13px;
+    -fx-text-fill: white;
+}
+
+/* What Nova answered: an output panel, because an app is reporting. */
+.nova-panel {
+    -fx-background-color: white;
+    -fx-background-radius: 0 10 10 0;
+    -fx-border-color: transparent transparent transparent #2e6b4f;
+    -fx-border-radius: 0 10 10 0;
+    -fx-border-width: 0 0 0 3;
+    -fx-padding: 10 14 10 12;
+    -fx-font-family: "Monospaced";
+    -fx-font-size: 12.5px;
+    -fx-text-fill: #23262d;
+    -fx-effect: dropshadow(gaussian, rgba(30, 40, 60, 0.08), 6, 0, 0, 1);
+}
+
+/* ------------------------------------------------------------------ */
+/* Input bar                                                           */
+/* ------------------------------------------------------------------ */
+
+.input-bar {
+    -fx-background-color: #f4f5f7;
+    -fx-border-color: #e3e5ea transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+    -fx-padding: 10 12 10 12;
+    -fx-spacing: 8;
+}
+
+.text-field {
+    -fx-background-color: white;
+    -fx-background-radius: 19;
+    -fx-border-color: #d7dae2;
+    -fx-border-radius: 19;
+    -fx-border-width: 1;
+    -fx-padding: 0 16 0 16;
+    -fx-font-size: 13px;
+    -fx-prompt-text-fill: #9aa0ac;
+}
+
+.text-field:focused {
+    -fx-border-color: #4f8cd9;
+    -fx-border-width: 2;
+}
+
+.button {
+    -fx-background-color: #2e6b4f;
+    -fx-background-radius: 19;
+    -fx-padding: 0 20 0 20;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: #3a8363;
+}
+
+.button:pressed {
+    -fx-background-color: #24543e;
+}

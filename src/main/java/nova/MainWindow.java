@@ -1,5 +1,6 @@
 package nova;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
@@ -24,17 +25,25 @@ public class MainWindow extends AnchorPane {
 
     private Nova nova;
 
-    private final Image userImage =
-            new Image(this.getClass().getResourceAsStream("/images/User.png"));
+    /**
+     * Nova's badge, shown beside each of its replies. There is no matching
+     * user image: the user's own messages are told apart by shape and side
+     * instead, since a portrait of yourself conveys nothing.
+     */
     private final Image novaImage =
             new Image(this.getClass().getResourceAsStream("/images/Nova.png"));
 
     /**
-     * Keeps the transcript scrolled to the newest message as it grows.
+     * Keeps the transcript scrolled to the newest message as it grows, and
+     * puts the caret in the input field so the user can type immediately.
      */
     @FXML
     public void initialize() {
         scrollPane.vvalueProperty().bind(dialogContainer.heightProperty());
+
+        // Deferred because focus cannot be taken before the scene exists, and
+        // initialize() runs while the FXML is still being loaded.
+        Platform.runLater(() -> userInput.requestFocus());
     }
 
     /**
@@ -77,7 +86,7 @@ public class MainWindow extends AnchorPane {
 
         String response = nova.getResponse(input);
         dialogContainer.getChildren().addAll(
-                DialogBox.getUserDialog(input, userImage),
+                DialogBox.getUserDialog(input),
                 DialogBox.getNovaDialog(response, novaImage)
         );
         userInput.clear();
