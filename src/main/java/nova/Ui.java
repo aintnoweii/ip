@@ -1,5 +1,8 @@
 package nova;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Handles everything the user sees.
  * The get...Message methods build plain response text with no framing, used
@@ -100,6 +103,38 @@ public class Ui {
         return "Noted, I've removed this task:\n  " + task + "\n"
                 + String.format("Now you have %d task%s in the list.",
                 taskCount, taskCount == 1 ? "" : "s");
+    }
+
+    /**
+     * Returns the text refusing an event that clashes with existing ones.
+     * Every clashing event is listed so the user can see what to reschedule
+     * without having to run "list" and compare times by eye.
+     *
+     * @param clashes the events the new one overlaps, never empty.
+     * @return the refusal text, ending with how to override it.
+     */
+    String getClashMessage(List<Event> clashes) {
+        ArrayList<String> lines = new ArrayList<>();
+        lines.add("That clashes with:");
+
+        for (Event clash : clashes) {
+            lines.add("  " + clash);
+        }
+
+        lines.add("Re-enter with " + Parser.FORCE_MARKER + " to add it anyway.");
+        return String.join("\n", lines);
+    }
+
+    /**
+     * Returns the notice shown at startup when the saved list already holds
+     * events that overlap. A count rather than a list, to keep startup brief.
+     *
+     * @param pairCount how many pairs of events clash, at least one.
+     * @return the notice text.
+     */
+    String getClashSummary(int pairCount) {
+        return String.format("%d pair%s of events in your list clash.",
+                pairCount, pairCount == 1 ? "" : "s");
     }
 
     /**

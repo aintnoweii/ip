@@ -85,16 +85,39 @@ public class Nova {
     public void run() {
         ui.showWelcome();
 
-        if (loadError != null) {
-            ui.printMessage(loadError);
-        }
-
-        if (storage.getSkippedLineCount() > 0) {
-            ui.printMessage(String.format("Skipped %d unreadable line(s) in %s.",
-                    storage.getSkippedLineCount(), storage.getFilePath()));
+        for (String notice : getStartupNotices()) {
+            ui.printMessage(notice);
         }
 
         runLoop();
+    }
+
+    /**
+     * Returns anything worth telling the user once the saved tasks are loaded:
+     * a file that could not be read, lines that had to be skipped, and events
+     * already in the list that clash. Returned rather than printed so the
+     * console and the GUI can both show them in their own way.
+     *
+     * @return the notices in the order they should be shown, possibly empty.
+     */
+    public ArrayList<String> getStartupNotices() {
+        ArrayList<String> notices = new ArrayList<>();
+
+        if (loadError != null) {
+            notices.add(loadError);
+        }
+
+        if (storage.getSkippedLineCount() > 0) {
+            notices.add(String.format("Skipped %d unreadable line(s) in %s.",
+                    storage.getSkippedLineCount(), storage.getFilePath()));
+        }
+
+        int clashingPairs = tasks.countClashingPairs();
+        if (clashingPairs > 0) {
+            notices.add(ui.getClashSummary(clashingPairs));
+        }
+
+        return notices;
     }
 
     /**
@@ -201,7 +224,18 @@ public class Nova {
         String[] parts = input.split("\\s+", 2);
         String command = parts[0].toLowerCase();
 
-        String argument = parts.length > 1 ? parts[1].trim() : "";
+        String rawArgument = parts.length > 1 ? parts[1].trim() : "";
+
+        // Stripped here rather than inside handleEvent, because the event
+        // command reads everything after "/to" as the end date and would
+        // otherwise try to parse the marker as part of it.
+        boolean isForced = Parser.hasForceMarker(rawArgument);
+        if (isForced && !command.equals("event")) {
+            return Parser.FORCE_MARKER
+                    + " only applies to events, which are the only tasks that can clash.";
+        }
+
+        String argument = isForced ? Parser.removeForceMarker(rawArgument) : rawArgument;
 
         return switch (command) {
             case "bye" -> ui.getFarewellMessage();
@@ -211,7 +245,7 @@ public class Nova {
             case "delete" -> handleDelete(argument);
             case "todo" -> handleTodo(argument);
             case "deadline" -> handleDeadline(argument);
-            case "event" -> handleEvent(argument);
+            case "event" -> handleEvent(argument, isForced);
             default -> "Input valid command - start with todo, deadline, event,"
                     + " list, find, mark, unmark or delete";
         };
@@ -337,10 +371,13 @@ public class Nova {
      * Adds a task spanning two dates, written
      * "{@code <description>} /from {@code <start>} /to {@code <end>}".
      *
-     * @param argument text after the "event" command word.
-     * @return confirmation of the addition, or the usage hint.
+     * @param argument text after the "event" command word, with any "/force"
+     *                 marker already removed.
+     * @param isForced true if the user asked to add the event even though it
+     *                 clashes with one already in the list.
+     * @return confirmation of the addition, the usage hint, or a refusal.
      */
-    private String handleEvent(String argument) {
+    private String handleEvent(String argument, boolean isForced) {
         String usageHint = "Use: event <task name> /from <start> /to <end>";
 
         MarkerParts descriptionAndRest = Parser.splitOnMarker(argument, "/from");
@@ -359,7 +396,23 @@ public class Nova {
             return "I couldn't understand that date. " + Parser.DATE_FORMAT_HINT;
         }
 
-        return addTask(new Event(descriptionAndRest.before(), false, from, to));
+        // A backwards range is invalid rather than merely inconvenient, so
+        // /force does not override it: there is nothing sensible to compare
+        // such an event against.
+        if (from.isAfter(to)) {
+            return "An event cannot end before it starts.";
+        }
+
+        Event newEvent = new Event(descriptionAndRest.before(), false, from, to);
+
+        if (!isForced) {
+            ArrayList<Event> clashes = tasks.findClashes(newEvent);
+            if (!clashes.isEmpty()) {
+                return ui.getClashMessage(clashes);
+            }
+        }
+
+        return addTask(newEvent);
     }
 
     /**

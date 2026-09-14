@@ -124,6 +124,49 @@ public class TaskList {
     }
 
     /**
+     * Returns the events already in the list that the given event overlaps.
+     * Only events take part: a todo has no time at all, and a deadline is a
+     * single instant rather than a span. Events already marked done are
+     * skipped, since finished work no longer occupies the time.
+     *
+     * @param candidate the event about to be added.
+     * @return the events it clashes with, in list order, empty if none.
+     */
+    ArrayList<Event> findClashes(Event candidate) {
+        return this.tasks.stream()
+                .filter(task -> task instanceof Event)
+                .map(task -> (Event) task)
+                .filter(event -> !event.isDone())
+                .filter(candidate::clashesWith)
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    /**
+     * Counts how many pairs of events already in the list clash with each
+     * other, for the notice shown at startup. Each pair is counted once.
+     *
+     * @return the number of clashing pairs.
+     */
+    int countClashingPairs() {
+        ArrayList<Event> events = this.tasks.stream()
+                .filter(task -> task instanceof Event)
+                .map(task -> (Event) task)
+                .filter(event -> !event.isDone())
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        int pairCount = 0;
+        for (int i = 0; i < events.size(); i++) {
+            for (int j = i + 1; j < events.size(); j++) {
+                if (events.get(i).clashesWith(events.get(j))) {
+                    pairCount++;
+                }
+            }
+        }
+
+        return pairCount;
+    }
+
+    /**
      * Returns the tasks whose description contains the given keyword.
      * The comparison ignores case, because someone searching for "Book" is
      * looking for the same thing as someone searching for "book"; a

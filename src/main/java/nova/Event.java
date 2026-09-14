@@ -27,6 +27,36 @@ public class Event extends Task {
     }
 
     /**
+     * Reports whether this event overlaps another in time.
+     * The comparison is half-open, so an event ending exactly when another
+     * begins does not clash: back-to-back scheduling is normal. The same rule
+     * means a zero-length event never clashes with anything, including itself.
+     *
+     * @param other the event to compare against.
+     * @return true if the two events occupy any of the same time.
+     */
+    public boolean clashesWith(Event other) {
+        // A zero-length event occupies no time, so it overlaps nothing. The
+        // comparison below cannot express that on its own: it would report an
+        // overlap for an instant falling strictly inside another event's span.
+        if (!this.occupiesTime() || !other.occupiesTime()) {
+            return false;
+        }
+
+        return this.from.isBefore(other.to) && other.from.isBefore(this.to);
+    }
+
+    /**
+     * Reports whether this event covers any time at all, which is false when
+     * it starts and ends at the same instant.
+     *
+     * @return true if the event has a non-zero duration.
+     */
+    private boolean occupiesTime() {
+        return this.from.isBefore(this.to);
+    }
+
+    /**
      * Returns this task as one data-file line.
      *
      * @return the saved form, e.g.

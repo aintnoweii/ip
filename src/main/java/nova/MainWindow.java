@@ -48,6 +48,13 @@ public class MainWindow extends AnchorPane {
 
         this.nova = nova;
         dialogContainer.getChildren().add(DialogBox.getNovaDialog(nova.getGreeting(), novaImage));
+
+        // The console prints these after its greeting; showing them here too
+        // means a GUI user also learns about an unreadable save file or a
+        // list that already contains clashing events.
+        for (String notice : nova.getStartupNotices()) {
+            dialogContainer.getChildren().add(DialogBox.getNovaDialog(notice, novaImage));
+        }
     }
 
     /**

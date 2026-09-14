@@ -34,6 +34,9 @@ public class Parser {
     static final String DATE_FORMAT_HINT =
             "Dates must look like 2019-10-15 or 2019-10-15 1800.";
 
+    /** Marker that overrides the refusal to add a clashing event. */
+    static final String FORCE_MARKER = "/force";
+
     /**
      * Positions of the fields in one line of the data file, which looks like
      * "D | 1 | return book | 2019-10-15T18:00". The first three are shared by
@@ -105,7 +108,8 @@ public class Parser {
      * @param fields      the whole line, already split on the separator.
      * @param description the description read from the shared fields.
      * @param isMarked    the done status read from the shared fields.
-     * @return the event, or null if either date is missing or unreadable.
+     * @return the event, or null if either date is missing, unreadable, or
+     *         the range runs backwards.
      */
     private static Task parseSavedEvent(String[] fields, String description, boolean isMarked) {
         if (fields.length <= FIELD_EVENT_TO) {
@@ -115,6 +119,13 @@ public class Parser {
         LocalDateTime from = parseStoredDateTime(fields[FIELD_EVENT_FROM]);
         LocalDateTime to = parseStoredDateTime(fields[FIELD_EVENT_TO]);
         if (from == null || to == null) {
+            return null;
+        }
+
+        // An event that ends before it starts cannot be compared against
+        // others sensibly, and the command that creates events now refuses
+        // one, so a saved line like this is treated as corrupt.
+        if (from.isAfter(to)) {
             return null;
         }
 
@@ -181,6 +192,36 @@ public class Parser {
         }
 
         return new MarkerParts(before, after);
+    }
+
+    /**
+     * Reports whether a command argument ends with the "/force" marker.
+     * Only a trailing marker counts, so that text earlier in a description is
+     * never mistaken for it.
+     *
+     * @param argument text after the command word.
+     * @return true if the argument ends with "/force".
+     */
+    static boolean hasForceMarker(String argument) {
+        return argument.trim().endsWith(FORCE_MARKER);
+    }
+
+    /**
+     * Returns the argument with a trailing "/force" marker removed.
+     * The marker has to come off before the rest is parsed: the event command
+     * treats everything after "/to" as the end date, so a marker left in place
+     * would be read as part of that date and fail to parse.
+     *
+     * @param argument text after the command word.
+     * @return the argument without the marker, trimmed.
+     */
+    static String removeForceMarker(String argument) {
+        String trimmed = argument.trim();
+        if (!trimmed.endsWith(FORCE_MARKER)) {
+            return trimmed;
+        }
+
+        return trimmed.substring(0, trimmed.length() - FORCE_MARKER.length()).trim();
     }
 
     /**
