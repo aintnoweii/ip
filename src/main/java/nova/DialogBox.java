@@ -1,17 +1,11 @@
 package nova;
 
 import java.io.IOException;
-import java.util.Collections;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 
@@ -21,23 +15,25 @@ import javafx.scene.layout.Priority;
  * <p>The conversation is between a person and an application rather than
  * between two people, so the two sides are deliberately not drawn alike.
  * A user message is a short line of speech: a compact tinted bubble on the
- * right that hugs its text, with no portrait, since the user needs no
- * reminder of who they are. A Nova message is program output: a full-width
- * panel on the left in a fixed-width font, marked with an accent stripe and
- * the app's badge. The fixed-width font is not only decoration -- a numbered
- * task list only lines up in columns if every character is the same width.
+ * right that hugs its text. A Nova reply is program output: a block of
+ * fixed-width text spanning the window, marked by a rule down its left edge.
+ * The fixed-width font is not only decoration -- a numbered task list only
+ * lines up in columns if every character is the same width.
  *
- * <p>The colours and fonts live in {@code /css/main.css}; this class decides
- * only the layout differences, which CSS cannot express.
+ * <p>Neither side carries an avatar. The user needs no portrait of
+ * themselves, and Nova's badge earns its keep better as the window icon than
+ * as an image repeated beside every reply, where it would cost width that a
+ * long reply needs for text.
+ *
+ * <p>Colours, fonts and padding live in {@code /css/main.css}; this class
+ * decides only the layout differences, which CSS cannot express.
  */
 public class DialogBox extends HBox {
     /** Fraction of the window width a user bubble may fill before it wraps. */
-    private static final double USER_BUBBLE_WIDTH_FRACTION = 0.72;
+    private static final double USER_BUBBLE_WIDTH_FRACTION = 0.82;
 
     @FXML
     private Label dialog;
-    @FXML
-    private ImageView displayPicture;
 
     private DialogBox(String text) {
         try {
@@ -49,11 +45,10 @@ public class DialogBox extends HBox {
             throw new IllegalStateException("Could not load DialogBox.fxml", e);
         }
 
-        // These are injected by name: the fx:id values in DialogBox.fxml must
-        // match these field names. Renaming one side only leaves the field
-        // null, and the NPE below would not say why.
+        // Injected by name: the fx:id in DialogBox.fxml must match this field
+        // name. Renaming one side only leaves the field null, and the NPE
+        // below would not say why.
         assert dialog != null : "DialogBox.fxml is missing fx:id=\"dialog\"";
-        assert displayPicture != null : "DialogBox.fxml is missing fx:id=\"displayPicture\"";
 
         dialog.setText(text);
     }
@@ -73,25 +68,20 @@ public class DialogBox extends HBox {
     /**
      * Returns a dialog box for one of Nova's replies.
      *
-     * @param text   text of Nova's reply.
-     * @param avatar Nova's badge, shown beside the panel.
-     * @return the dialog box, styled as a left-aligned output panel.
+     * @param text text of Nova's reply.
+     * @return the dialog box, styled as a left-aligned block of output.
      */
-    public static DialogBox getNovaDialog(String text, Image avatar) {
+    public static DialogBox getNovaDialog(String text) {
         DialogBox box = new DialogBox(text);
-        box.applyNovaStyle(avatar);
+        box.applyNovaStyle();
         return box;
     }
 
     /**
      * Styles this box as something the user said: a bubble against the right
-     * edge, with the avatar removed entirely rather than merely hidden, so it
-     * takes up no space in the row.
+     * edge, sized to its text.
      */
     private void applyUserStyle() {
-        displayPicture.setVisible(false);
-        displayPicture.setManaged(false);
-
         setAlignment(Pos.TOP_RIGHT);
         dialog.getStyleClass().add("user-bubble");
 
@@ -103,30 +93,14 @@ public class DialogBox extends HBox {
     }
 
     /**
-     * Styles this box as something Nova reported: an output panel spanning the
-     * window, with the badge on the left.
-     *
-     * @param avatar Nova's badge.
+     * Styles this box as something Nova reported: a block of output taking the
+     * full width, so a wrapped task list is broken as few times as possible.
      */
-    private void applyNovaStyle(Image avatar) {
-        displayPicture.setImage(avatar);
-        flip();
+    private void applyNovaStyle() {
+        setAlignment(Pos.TOP_LEFT);
         dialog.getStyleClass().add("nova-panel");
 
-        // Unlike the user's bubble, the panel fills whatever width is left, so
-        // a task list is not needlessly re-wrapped in a wide window.
         HBox.setHgrow(dialog, Priority.ALWAYS);
         dialog.setMaxWidth(Double.MAX_VALUE);
-    }
-
-    /**
-     * Flips the dialog box so the ImageView is on the left and the text on
-     * the right, used to tell the two speakers apart at a glance.
-     */
-    private void flip() {
-        ObservableList<Node> tmp = FXCollections.observableArrayList(this.getChildren());
-        Collections.reverse(tmp);
-        getChildren().setAll(tmp);
-        setAlignment(Pos.TOP_LEFT);
     }
 }

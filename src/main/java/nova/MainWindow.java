@@ -5,7 +5,6 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 
@@ -24,14 +23,6 @@ public class MainWindow extends AnchorPane {
     private Button sendButton;
 
     private Nova nova;
-
-    /**
-     * Nova's badge, shown beside each of its replies. There is no matching
-     * user image: the user's own messages are told apart by shape and side
-     * instead, since a portrait of yourself conveys nothing.
-     */
-    private final Image novaImage =
-            new Image(this.getClass().getResourceAsStream("/images/Nova.png"));
 
     /**
      * Keeps the transcript scrolled to the newest message as it grows, and
@@ -56,13 +47,13 @@ public class MainWindow extends AnchorPane {
         assert nova != null : "setNova() given a null chatbot";
 
         this.nova = nova;
-        dialogContainer.getChildren().add(DialogBox.getNovaDialog(nova.getGreeting(), novaImage));
+        dialogContainer.getChildren().add(DialogBox.getNovaDialog(nova.getGreeting()));
 
         // The console prints these after its greeting; showing them here too
         // means a GUI user also learns about an unreadable save file or a
         // list that already contains clashing events.
         for (String notice : nova.getStartupNotices()) {
-            dialogContainer.getChildren().add(DialogBox.getNovaDialog(notice, novaImage));
+            dialogContainer.getChildren().add(DialogBox.getNovaDialog(notice));
         }
     }
 
@@ -87,7 +78,7 @@ public class MainWindow extends AnchorPane {
         String response = nova.getResponse(input);
         dialogContainer.getChildren().addAll(
                 DialogBox.getUserDialog(input),
-                DialogBox.getNovaDialog(response, novaImage)
+                DialogBox.getNovaDialog(response)
         );
         userInput.clear();
     }
