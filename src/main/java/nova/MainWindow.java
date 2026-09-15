@@ -1,10 +1,10 @@
 package nova;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 
@@ -24,17 +24,17 @@ public class MainWindow extends AnchorPane {
 
     private Nova nova;
 
-    private final Image userImage =
-            new Image(this.getClass().getResourceAsStream("/images/User.png"));
-    private final Image novaImage =
-            new Image(this.getClass().getResourceAsStream("/images/Nova.png"));
-
     /**
-     * Keeps the transcript scrolled to the newest message as it grows.
+     * Keeps the transcript scrolled to the newest message as it grows, and
+     * puts the caret in the input field so the user can type immediately.
      */
     @FXML
     public void initialize() {
         scrollPane.vvalueProperty().bind(dialogContainer.heightProperty());
+
+        // Deferred because focus cannot be taken before the scene exists, and
+        // initialize() runs while the FXML is still being loaded.
+        Platform.runLater(() -> userInput.requestFocus());
     }
 
     /**
@@ -47,13 +47,13 @@ public class MainWindow extends AnchorPane {
         assert nova != null : "setNova() given a null chatbot";
 
         this.nova = nova;
-        dialogContainer.getChildren().add(DialogBox.getNovaDialog(nova.getGreeting(), novaImage));
+        dialogContainer.getChildren().add(DialogBox.getNovaDialog(nova.getGreeting()));
 
         // The console prints these after its greeting; showing them here too
         // means a GUI user also learns about an unreadable save file or a
         // list that already contains clashing events.
         for (String notice : nova.getStartupNotices()) {
-            dialogContainer.getChildren().add(DialogBox.getNovaDialog(notice, novaImage));
+            dialogContainer.getChildren().add(DialogBox.getNovaDialog(notice));
         }
     }
 
@@ -77,8 +77,8 @@ public class MainWindow extends AnchorPane {
 
         String response = nova.getResponse(input);
         dialogContainer.getChildren().addAll(
-                DialogBox.getUserDialog(input, userImage),
-                DialogBox.getNovaDialog(response, novaImage)
+                DialogBox.getUserDialog(input),
+                DialogBox.getNovaDialog(response)
         );
         userInput.clear();
     }
